@@ -1,0 +1,210 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="p-grid">
+    <!-- Título y descripción -->
+    <div class="p-col-12">
+        <h1 class="page-title">Gestión de Depósitos</h1>
+        <p class="page-description">
+            Crea, edita y elimina depósitos fácilmente. Administra su disponibilidad.
+        </p>
+    </div>
+
+    <!-- Barra de herramientas -->
+    <div class="p-col-12 toolbar">
+        <div class="search-wrapper">
+            <input
+                type="text"
+                pInputText
+                [(ngModel)]="globalFilter"
+                placeholder="Buscar Depósito"
+                class="search-input"
+            />
+            <button
+                pButton
+                type="button"
+                icon="pi pi-search"
+                class="p-button-outlined search-button"
+            ></button>
+        </div>
+        <button
+            pButton
+            label="Nuevo Depósito"
+            icon="pi pi-plus"
+            class="p-button-outlined p-button-success new-deposito-button"
+            (click)="showDepositoDialog()"
+        ></button>
+    </div>
+</div>
+
+<!-- Tabla de depósitos -->
+<p-table
+    [value]="depositos"
+    [paginator]="true"
+    [rows]="5"
+    [globalFilterFields]="['name', 'ciudad', 'direccion']"
+    [sortMode]="'multiple'"
+    [responsiveLayout]="'scroll'"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} depósitos"
+>
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="ciudad">Ciudad <p-sortIcon field="ciudad"></p-sortIcon></th>
+            <th pSortableColumn="direccion">Dirección <p-sortIcon field="direccion"></p-sortIcon></th>
+            <th pSortableColumn="available">Estado <p-sortIcon field="available"></p-sortIcon></th>
+            <th>Acciones</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-deposito>
+        <tr>
+            <td>{{ deposito.name }}</td>
+            <td>{{ deposito.ciudad }}</td>
+            <td>{{ deposito.direccion }}</td>
+            <td>
+                <span
+                    class="badge"
+                    [ngClass]="deposito.available ? 'badge-success' : 'badge-danger'"
+                >
+                    <i
+                        class="pi"
+                        [ngClass]="deposito.available ? 'pi-check-circle' : 'pi-times-circle'"
+                    ></i>
+                    {{ deposito.available ? 'Disponible' : 'No disponible' }}
+                </span>
+            </td>
+            <td>
+                <button
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-text"
+                    (click)="editDeposito(deposito)"
+                ></button>
+                <button
+                    pButton
+                    icon="pi pi-trash"
+                    class="p-button-text p-button-danger"
+                    (click)="deleteDeposito(deposito.id, deposito.name)"
+                ></button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Diálogo de Depósito -->
+<p-dialog
+    [(visible)]="depositoDialog"
+    [modal]="true"
+    [closable]="false"
+    [responsive]="true"
+    [style]="{ width: '60vw' }"
+    [header]="isEdit ? 'Editar Depósito' : 'Nuevo Depósito'"
+>
+    <div class="modal-section">
+        <div class="decorative-section">
+            <i class="pi pi-home"></i>
+            <h2>{{ isEdit ? 'Editar Depósito' : 'Nuevo Depósito' }}</h2>
+        </div>
+
+        <hr />
+
+        <form [formGroup]="depositoForm" class="form-grid">
+            <!-- Nombre -->
+            <div class="p-field">
+                <label for="name">Nombre <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-tag"></i>
+                    <input
+                        id="name"
+                        type="text"
+                        pInputText
+                        formControlName="name"
+                        placeholder="Nombre del depósito"
+                        required
+                    />
+                </div>
+                <small
+                    *ngIf="submitted && !depositoForm.get('name')?.value"
+                    class="p-error"
+                >
+                    El nombre es obligatorio.
+                </small>
+            </div>
+
+            <!-- Ciudad -->
+            <div class="p-field">
+                <label for="ciudad">Ciudad</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-map"></i>
+                    <input
+                        id="ciudad"
+                        type="text"
+                        pInputText
+                        formControlName="ciudad"
+                        placeholder="Ciudad del depósito"
+                    />
+                </div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="p-field">
+                <label for="direccion">Dirección</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-map-marker"></i>
+                    <input
+                        id="direccion"
+                        type="text"
+                        pInputText
+                        formControlName="direccion"
+                        placeholder="Dirección del depósito"
+                    />
+                </div>
+            </div>
+
+            <!-- Disponibilidad -->
+            <div class="p-field">
+                <label for="available">Disponible</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-check-square"></i>
+                    <p-checkbox
+                        id="available"
+                        formControlName="available"
+                        binary="true"
+                    ></p-checkbox>
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="p-field p-field-observaciones">
+                <label for="observaciones">Observaciones</label>
+                <textarea
+                    id="observaciones"
+                    rows="3"
+                    pInputTextarea
+                    formControlName="observaciones"
+                    placeholder="Notas internas u observaciones"
+                ></textarea>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="modal-footer">
+        <button
+            pButton
+            label="Cancelar"
+            icon="pi pi-times"
+            class="p-button-secondary"
+            (click)="hideDepositoDialog()"
+        ></button>
+        <button
+            pButton
+            label="Guardar"
+            icon="pi pi-check"
+            class="p-button-success"
+            [disabled]="depositoForm.invalid"
+            (click)="saveDeposito()"
+        ></button>
+    </footer>
+</p-dialog>

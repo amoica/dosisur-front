@@ -1,0 +1,105 @@
+<div class="detail-container">
+    <!-- ENCABEZADO -->
+    <div class="header-section">
+      <div class="header-icon">
+        <i class="pi pi-id-card"></i>
+      </div>
+      <div class="header-info">
+        <h2 class="provider-name">{{ proveedor.nombre }}</h2>
+  
+        <!-- Párrafo con email y teléfono en estilo "badge" -->
+        <p class="provider-meta">
+          <span class="badge">
+            <i class="pi pi-envelope"></i> {{ proveedor.email }}
+          </span>
+          <span class="badge">
+            <i class="pi pi-phone"></i> {{ proveedor.telefono }}
+          </span>
+        </p>
+      </div>
+    </div>
+  
+    <p-tabView>
+      <!-- TAB INFORMACIÓN GENERAL -->
+      <p-tabPanel header="Información General" leftIcon="pi pi-info-circle">
+        <div class="info-grid">
+          <div class="info-item">
+            <label><i class="pi pi-map-marker"></i> Dirección:</label>
+            <span>{{ proveedor.direccion }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-building"></i> Ciudad:</label>
+            <span>{{ proveedor.ciudad }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-globe"></i> Provincia:</label>
+            <span>{{ proveedor.provincia }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-tag"></i> Código Postal:</label>
+            <span>{{ proveedor.codigoPostal }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-id-card"></i> CUIT:</label>
+            <span>{{ proveedor.cuit }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-briefcase"></i> Condición Fiscal:</label>
+            <span>{{ proveedor.condicionFiscal }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-cog"></i> Tipo de Proveedor:</label>
+            <span>{{ proveedor.tipoProveedor }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-comment"></i> Observaciones:</label>
+            <span>{{ proveedor.observaciones }}</span>
+          </div>
+        </div>
+      </p-tabPanel>
+  
+      <!-- TAB CONTACTOS -->
+      <p-tabPanel header="Contactos" leftIcon="pi pi-users">
+        <p-table
+          [value]="proveedor.contactos || []"
+          [responsiveLayout]="'scroll'"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Cargo</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-cont>
+            <tr>
+              <td>{{ cont.nombre }}</td>
+              <td>{{ cont.email }}</td>
+              <td>{{ cont.telefono }}</td>
+              <td>{{ cont.cargo }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+  
+      <!-- TAB COTIZACIONES -->
+      <p-tabPanel header="Cotizaciones" leftIcon="pi pi-file">
+        <!-- Aquí puedes colocar tu <p-table> de cotizaciones cuando lo tengas -->
+        <div class="placeholder-section">
+          <i class="pi pi-file"></i>
+          <p>Próximamente se mostrarán aquí las cotizaciones relacionadas.</p>
+        </div>
+      </p-tabPanel>
+  
+      <!-- TAB ÓRDENES DE COMPRA -->
+      <p-tabPanel header="Órdenes de Compra" leftIcon="pi pi-shopping-cart">
+        <!-- Aquí tu <p-table> de órdenes de compra -->
+        <div class="placeholder-section">
+          <i class="pi pi-shopping-cart"></i>
+          <p>Próximamente se mostrarán aquí las órdenes de compra asociadas.</p>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </div>

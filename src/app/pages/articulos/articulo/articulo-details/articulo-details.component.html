@@ -1,0 +1,96 @@
+<div class="detail-container" *ngIf="articulo">
+  <!-- Top Navigation: Botón de volver -->
+  <div class="top-nav">
+    <button class="back-button" (click)="goBack()" title="Volver">
+      <i class="pi pi-arrow-left"></i>
+    </button>
+  </div>
+  
+  <!-- Encabezado principal -->
+  <div class="header-section">
+    <!-- Imagen o ícono predeterminado -->
+    <div class="header-image" *ngIf="articulo.imagenUrl; else defaultIcon">
+      <img [src]="articulo.imagenUrl" alt="{{ articulo.name }}" class="header-thumbnail" />
+    </div>
+    <ng-template #defaultIcon>
+      <div class="header-icon">
+        <i class="pi pi-box"></i>
+      </div>
+    </ng-template>
+    <!-- Información del artículo -->
+    <div class="header-info">
+      <h2 class="article-name">{{ articulo.name }}</h2>
+    </div>
+  </div>
+
+  <!-- TabView -->
+  <p-tabView>
+    <!-- TAB INFORMACIÓN GENERAL -->
+    <p-tabPanel header="Información General" leftIcon="pi pi-info-circle">
+      <div class="info-grid">
+        <div class="info-item">
+          <label><i class="pi pi-key"></i> Código:</label>
+          <span>{{ articulo.code }}</span>
+        </div>
+        <div class="info-item">
+          <label><i class="pi pi-sort-numeric-down"></i> Stock Mínimo:</label>
+          <span>{{ articulo.minimunStock }}</span>
+        </div>
+        <div class="info-item">
+          <label><i class="pi pi-check-square"></i> Disponible:</label>
+          <span>{{ articulo.available ? 'Sí' : 'No' }}</span>
+        </div>
+        <div class="info-item">
+          <label><i class="pi pi-box"></i> Inventoriable:</label>
+          <span>{{ articulo.isInventoriable ? 'Sí' : 'No' }}</span>
+        </div>
+        <div class="info-item" *ngIf="articulo.unidad">
+          <label><i class="pi pi-plus"></i> Unidad:</label>
+          <span>{{ articulo.unidad }}</span>
+        </div>
+        <div class="info-item" *ngIf="articulo.description">
+          <label><i class="pi pi-info-circle"></i> Descripción:</label>
+          <span>{{ articulo.description }}</span>
+        </div>
+      </div>
+    </p-tabPanel>
+
+    <!-- TAB PROVEEDORES -->
+    <p-tabPanel header="Proveedores" leftIcon="pi pi-shopping-cart">
+      <p-table [value]="articulo.insumoProveedor || []" [responsiveLayout]="'scroll'" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Proveedor</th>
+            <th>Código Proveedor</th>
+            <th>Precio Unitario</th>
+            <th>Fecha Actualización</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rel>
+          <tr>
+            <td>{{ rel.proveedor?.nombre || rel.proveedorId }}</td>
+            <td>{{ rel.codigoProveedor }}</td>
+            <td>{{ rel.precioUnitario != null ? (rel.precioUnitario | currency) : 'N/A' }}</td>
+            <td>{{ rel.fechaActualizacion | date:'short' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+
+    <!-- TAB MOVIMIENTOS (placeholder) -->
+    <p-tabPanel header="Movimientos" leftIcon="pi pi-exchange">
+      <div class="placeholder-section">
+        <i class="pi pi-exchange"></i>
+        <p>Próximamente se mostrarán los movimientos asociados a este artículo.</p>
+      </div>
+    </p-tabPanel>
+
+    <!-- TAB SOLICITUDES (placeholder) -->
+    <p-tabPanel header="Solicitudes" leftIcon="pi pi-file">
+      <div class="placeholder-section">
+        <i class="pi pi-file"></i>
+        <p>Próximamente se mostrarán las solicitudes de cotización asociadas.</p>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+</div>

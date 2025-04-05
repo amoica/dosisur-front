@@ -1,0 +1,317 @@
+/* ========================================================================
+   1. Variables y Estilos Globales
+======================================================================== */
+:root {
+  --primary-color: #1976d2;
+  --primary-color-light: #63a4ff;
+  --text-color: #333;
+  --text-secondary-color: #777;
+  --background-color: #f9f9f9;
+  --card-background: #fff;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+}
+
+/* ========================================================================
+   2. Contenedor Principal
+======================================================================== */
+.skid-creator-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+  background-color: white;
+}
+
+/* ========================================================================
+   3. Encabezado y Navegación
+======================================================================== */
+.receta-header {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.header-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--card-background);
+  color: var(--text-color);
+  box-shadow: var(--box-shadow);
+  transition: background-color 0.3s, color 0.3s;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.header-button:hover {
+  background-color: var(--primary-color-light);
+  color: #fff;
+}
+
+.header-button.active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* ========================================================================
+   4. Tarjetas y Formularios
+======================================================================== */
+.card-create,
+.card-list {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  background-color: var(--card-background);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-dropdown {
+  width: 100% !important;
+  background-color: var(--card-background) !important;
+  border: 1px solid #ddd !important;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+:host ::ng-deep .p-inputtext:focus,
+:host ::ng-deep .p-dropdown:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.3);
+}
+
+/* ========================================================================
+   5. FileUpload y Vista Previa
+======================================================================== */
+.custom-fileupload-input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px dashed #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  font-weight: 500;
+  transition: border-color 0.3s, background-color 0.3s;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.custom-fileupload-input:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+.images-preview {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.image-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 80px;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ========================================================================
+   6. Botones y Acciones
+======================================================================== */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.custom-delete-button {
+  background-color: transparent !important;
+  border: none !important;
+  color: #e53935 !important;
+  transition: color 0.2s, transform 0.2s;
+  font-size: 1.2rem;
+}
+
+.custom-delete-button:hover {
+  color: #d32f2f !important;
+  transform: scale(1.1);
+}
+
+.custom-create-button {
+  border: none !important;
+  color: #fff !important;
+  padding: 1rem 3rem !important;
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+/* ========================================================================
+   6.1. Filas de Ítems (Insumos)
+======================================================================== */
+.items-container {
+  margin-top: 1rem;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item-field {
+  flex: 1; /* Ocupará todo el espacio disponible */
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ========================================================================
+   6.2. Distribución de Botones
+======================================================================== */
+/* Centra los botones de agregar componente */
+.add-section-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center; /* Centra los botones */
+  margin-top: 2rem;
+}
+
+/* Mueve el botón "Crear Skid" a la derecha */
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Mueve el botón al extremo derecho */
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+/* ========================================================================
+   7. Diálogo de Confirmación
+======================================================================== */
+.confirm-dialog {
+  .dialog-content {
+    padding: 1rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+
+    .dialog-title {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .dialog-info {
+      margin-bottom: 1rem;
+      p {
+        margin: 0.3rem 0;
+        font-size: 1rem;
+        color: var(--text-color);
+      }
+    }
+
+    .summary-table {
+      margin-top: 1rem;
+      ::ng-deep .p-datatable-thead > tr > th {
+        background-color: var(--primary-color);
+        color: #fff;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      ::ng-deep .p-datatable-tbody > tr:hover > td {
+        background-color: #f7f7f7;
+      }
+    }
+
+    .expansion-content {
+      padding: 1rem;
+      background-color: #fafafa;
+      border-top: 1px solid #ddd;
+      margin-top: -1px;
+    }
+
+    .dialog-footer-text {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-secondary-color);
+      margin-top: 1rem;
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+}
+
+/* ========================================================================
+   8. Responsividad
+======================================================================== */
+@media (max-width: 768px) {
+  .skid-creator-container {
+    padding: 1rem;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  p-table {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,98 @@
+.detail-container {
+    margin: 1rem auto;
+    max-width: 1100px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Header */
+  .header-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .header-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-right: 1rem;
+  }
+  .header-info .client-name {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+  }
+  /* "Badges" para email, teléfono, celular */
+  .client-meta {
+    margin: 0.5rem 0;
+  }
+  .client-meta .badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .client-meta .badge i {
+    margin-right: 0.4rem;
+  }
+  
+  /* Info Grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* dos columnas */
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 768px) {
+    .info-grid {
+      grid-template-columns: 1fr; /* una columna en móvil */
+    }
+  }
+  .info-item {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #eee;
+  }
+  .info-item label {
+    font-weight: bold;
+    white-space: nowrap;
+    color: var(--primary-color);
+  }
+  .info-item span {
+    color: #555;
+  }
+  
+  /* TabView Styles */
+  ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-title {
+    font-weight: 600;
+  }
+  
+  /* Placeholder */
+  .placeholder-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: var(--text-secondary-color);
+    text-align: center;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  .placeholder-section i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+  }

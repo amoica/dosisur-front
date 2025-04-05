@@ -1,0 +1,93 @@
+<div class="detail-container">
+    <!-- ENCABEZADO -->
+    <div class="header-section">
+      <div class="header-icon">
+        <i class="pi pi-id-card"></i>
+      </div>
+      <div class="header-info">
+        <h2 class="client-name">{{ cliente.nombre }}</h2>
+  
+        <p class="client-meta">
+          <!-- "Badges" para email, teléfono, celular (si lo deseas) -->
+          <span class="badge" *ngIf="cliente.email">
+            <i class="pi pi-envelope"></i> {{ cliente.email }}
+          </span>
+          <span class="badge" *ngIf="cliente.telefono">
+            <i class="pi pi-phone"></i> {{ cliente.telefono }}
+          </span>
+          <span class="badge" *ngIf="cliente.celular">
+            <i class="pi pi-mobile"></i> {{ cliente.celular }}
+          </span>
+        </p>
+      </div>
+    </div>
+  
+    <!-- Tabs -->
+    <p-tabView>
+      <!-- Tab: Info General -->
+      <p-tabPanel header="Información General" leftIcon="pi pi-info-circle">
+        <div class="info-grid">
+          <div class="info-item">
+            <label><i class="pi pi-map-marker"></i> Dirección:</label>
+            <span>{{ cliente.direccion }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-building"></i> Ciudad:</label>
+            <span>{{ cliente.ciudad }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-globe"></i> Provincia:</label>
+            <span>{{ cliente.provincia }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-tag"></i> Código Postal:</label>
+            <span>{{ cliente.codigoPostal }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-id-card"></i> CUIT o DNI:</label>
+            <span>{{ cliente.cuit }}</span>
+          </div>
+          <div class="info-item">
+            <label><i class="pi pi-comment"></i> Observaciones:</label>
+            <span>{{ cliente.observaciones }}</span>
+          </div>
+        </div>
+      </p-tabPanel>
+
+
+      <!-- TAB CONTACTOS -->
+      <p-tabPanel header="Contactos" leftIcon="pi pi-users">
+        <p-table
+          [value]="cliente.contactos || []"
+          [responsiveLayout]="'scroll'"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Cargo</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-cont>
+            <tr>
+              <td>{{ cont.nombre }}</td>
+              <td>{{ cont.email }}</td>
+              <td>{{ cont.telefono }}</td>
+              <td>{{ cont.cargo }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+  
+  
+      <!-- Otro tab, si deseas -->
+      <p-tabPanel header="Otros" leftIcon="pi pi-briefcase">
+        <div class="placeholder-section">
+          <i class="pi pi-briefcase"></i>
+          <p>Aquí podrías mostrar más información.</p>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </div>

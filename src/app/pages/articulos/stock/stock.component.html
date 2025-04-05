@@ -1,0 +1,100 @@
+<div class="stock-container">
+    <h1 class="page-title">Gestión de Stock</h1>
+    <p class="page-subtitle">Consulta y administra el estado actual de los ítems en stock.</p>
+  
+    <!-- Barra de herramientas -->
+    <div class="toolbar">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="searchTerm"
+          (input)="filterStock()"
+          placeholder="Buscar..."
+          class="search-input"
+        />
+      </div>
+      <button
+        pButton
+        label="Exportar Inventario"
+        icon="pi pi-file-excel"
+        class="p-button-success"
+        (click)="exportStock()"
+      ></button>
+    </div>
+  
+    <!-- Tabla de stock -->
+    <p-table [value]="filteredStockItems" responsiveLayout="scroll" class="stock-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Cantidad</th>
+          <th>Estado</th>
+          <th>Última Actualización</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.category }}</td>
+          <td>
+            <span
+              [ngClass]="{ 'low-stock': item.quantity <= item.criticalLevel }"
+              class="quantity-badge"
+            >
+              {{ item.quantity }}
+            </span>
+          </td>
+          <td>
+            <p-tag [value]="item.status" [severity]="getStatusSeverity(item.status)"></p-tag>
+          </td>
+          <td>{{ item.updated | date: 'short' }}</td>
+          <td>
+            <button
+              pButton
+              type="button"
+              label="Ver Detalle"
+              icon="pi pi-search"
+              class="p-button-sm p-button-info"
+              (click)="showDetails(item)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  
+    <!-- Modal de Detalles -->
+    <p-dialog [(visible)]="modalVisible" [modal]="true" [closable]="false" [style]="{ width: '40vw' }">
+      <ng-container *ngIf="selectedStockItem">
+        <div class="modal-header">
+          <h2>Detalles del Producto</h2>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-times"
+            class="p-button-sm p-button-danger"
+            (click)="closeModal()"
+          ></button>
+        </div>
+        <div class="modal-content">
+          <p><strong>Nombre:</strong> {{ selectedStockItem.name }}</p>
+          <p><strong>Categoría:</strong> {{ selectedStockItem.category }}</p>
+          <p><strong>Cantidad:</strong> {{ selectedStockItem.quantity }}</p>
+          <p><strong>Estado:</strong> {{ selectedStockItem.status }}</p>
+          <p><strong>Última Actualización:</strong> {{ selectedStockItem.updated | date: 'short' }}</p>
+          <p><strong>Nivel Crítico:</strong> {{ selectedStockItem.criticalLevel }}</p>
+        </div>
+        <div class="modal-actions">
+          <button
+            pButton
+            label="Cerrar"
+            icon="pi pi-times"
+            class="p-button-secondary"
+            (click)="closeModal()"
+          ></button>
+        </div>
+      </ng-container>
+    </p-dialog>
+  </div>

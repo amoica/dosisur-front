@@ -1,0 +1,406 @@
+/* Variables de color y estilos base */
+:root {
+  --primary-color: #1976d2;
+  --primary-color-light: #63a4ff;
+  --text-color: #333;
+  --text-secondary-color: #777;
+  --background-color: #f9f9f9;
+  --card-background: #fff;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+}
+
+/* Contenedor principal */
+.receta-container {
+  padding: 2rem;
+  background-color: var(--background-color);
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Mejorar distribución de grid con gap */
+.p-grid {
+  gap: 1rem;
+}
+
+/* Estilo para cada columna de formulario */
+.p-col-12 {
+  margin-bottom: 1rem;
+}
+
+/* Estilos para los grupos de campos */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* Estilos para inputs y p-select (usando la clase interna p-dropdown) */
+.form-group input,
+.form-group .p-dropdown .p-select {
+  padding: 0.75rem !important;
+  border: 1px solid #ccc !important;
+  border-radius: var(--border-radius) !important;
+  font-size: 1rem !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Efecto focus para inputs y p-dropdown */
+.form-group input:focus,
+.form-group .p-select .p-dropdown:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+  outline: none;
+}
+
+/* Tarjeta de creación */
+.card-create {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  background-color: var(--card-background);
+}
+
+/* Sección de PickList */
+.picklist-section {
+  margin: 2rem 0;
+}
+
+.picklist-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.picklist-item:last-child {
+  border-bottom: none;
+}
+
+.picklist-item .item-name {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.picklist-item .item-code {
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+}
+
+/* Tabla de componentes seleccionados */
+.table-ingredients {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.table-ingredients th,
+.table-ingredients td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.input-quantity {
+  width: 80px;
+}
+
+/* Previsualización de la receta */
+.receta-preview {
+  margin-top: 2rem;
+}
+
+.receta-preview .card-preview {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  background-color: var(--card-background);
+  padding: 1.5rem;
+}
+
+.receta-preview .preview-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.receta-preview .preview-header h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.receta-preview .preview-header .preview-code {
+  font-size: 1rem;
+  color: var(--text-secondary-color);
+}
+
+.receta-preview ul {
+  list-style: none;
+  padding: 0;
+}
+
+.receta-preview ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.receta-preview ul li i {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.receta-preview ul li .unit {
+  font-style: italic;
+  color: var(--text-secondary-color);
+}
+
+/* Acciones del formulario */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Listado de Componentes */
+.card-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  background-color: var(--card-background);
+}
+
+.table-recetas {
+  width: 100%;
+}
+
+.table-recetas th,
+.table-recetas td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table-recetas tr:hover {
+  background-color: #f1f1f1;
+}
+
+.component-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.component-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.component-list li i {
+  color: var(--primary-color);
+}
+
+/* Estilos para el diálogo de edición */
+.dialog-form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: var(--card-background);
+  width: 100% !important;
+}
+
+.dialog-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dialog-form .form-group label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.dialog-form .form-group input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+/* Ajuste para el picklist y la tabla */
+.picklist-section,
+.selected-items {
+  margin-top: 1rem;
+}
+
+/* Footer del diálogo para botones alineados a la derecha */
+p-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+p-footer button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+p-footer button:hover {
+  transform: scale(1.05);
+}
+
+/* Estilos generales para el diálogo moderno */
+.modern-dialog .p-dialog-content {
+  background: #fff;
+  padding: 2rem;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+}
+
+/* Tabla para mostrar la información básica del componente */
+.detail-info {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.detail-info th,
+.detail-info td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-info th {
+  width: 30%;
+  font-weight: 600;
+  color: #555;
+}
+
+.detail-info td {
+  color: #333;
+}
+
+/* Estilos para la imagen dentro de la tabla */
+.detail-img {
+  max-width: 200px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Tabla para los materiales */
+.materials-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.materials-table th,
+.materials-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.materials-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Footer del diálogo */
+.p-dialog .p-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+/* Opcional: Ajustes para botones en el encabezado y secciones generales */
+.receta-header.modern-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dialog-form {
+  width: 100% !important;
+}
+
+/* Estilo para el diálogo redondeado */
+.rounded-dialog .p-dialog {
+  border-radius: 1rem;
+}
+
+/* Estilo para inputs con bordes redondeados y colores sutiles */
+.input-rounded {
+  border-radius: 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  padding: 0.5rem;
+  transition: border-color 0.3s;
+}
+
+.input-rounded:focus {
+  border-color: #66afe9 !important;
+  outline: none !important;
+}
+
+/* Estilos adicionales para etiquetas y botones */
+.dialog-form label {
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+.labelTipo{
+  font-weight: 600 !important;
+  margin-right: 2px;
+  color: var(--text-color) !important;
+}
+
+.p-button-rounded {
+  border-radius: 1.5rem !important;
+}
+
+/* Ajuste para inputs y dropdown con bordes redondeados */
+.input-rounded {
+  border-radius: 10px !important;
+}
+
+/* Si deseas ajustar el padding y el margen para un espaciado uniforme */
+.form-group > * {
+  margin-bottom: 1rem;
+}
+
+/* Si requieres modificar el estilo del dropdown */
+.ui-dropdown.input-rounded .ui-dropdown-label {
+  border-radius: 10px;
+  padding: 0.5rem;
+}
+
+/* Ejemplo para ordenar elementos en el grid (opcional) */
+@media (min-width: 768px) {
+  .order-md-1 { order: 1; }
+  .order-md-2 { order: 2; }
+  .order-md-3 { order: 3; }
+}

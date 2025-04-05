@@ -1,0 +1,119 @@
+.detail-container {
+    margin: 1rem auto;
+    max-width: 1100px; /* ancho máximo */
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    /* box-shadow para un efecto sutil */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Ajuste para pantallas muy grandes:
+     Ocupa 100% del contenedor, sin quedar demasiado centrado/chico.
+     El "max-width" controla que no crezca infinito.
+  */
+  
+  /* Header */
+  .header-section {
+    display: flex;
+    flex-wrap: wrap; /* para que en pantallas chicas, se apilen */
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .header-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-right: 1rem;
+  }
+  
+  .header-info {
+    flex: 1; /* Que ocupe el espacio disponible */
+  }
+  
+  .header-info .provider-name {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+  }
+  
+  /* "Badges" para email y teléfono */
+  .provider-meta {
+    margin: 0.5rem 0;
+  }
+  
+  .provider-meta .badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .provider-meta .badge i {
+    margin-right: 0.4rem;
+  }
+  
+  /* Info Grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  /* Responsivo: a pantallas < 768px -> 1 columna */
+  @media (max-width: 768px) {
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .info-item {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 0.8rem;
+    display: flex;
+    flex-wrap: wrap; /* para pantallas chicas */
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #eee;
+  }
+  
+  .info-item label {
+    font-weight: bold;
+    white-space: nowrap;
+    color: var(--primary-color);
+  }
+  
+  .info-item span {
+    color: #555;
+  }
+  
+  /* TabView - estilo */
+  ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-title {
+    font-weight: 600;
+  }
+  
+  /* Placeholder secciones vacías */
+  .placeholder-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: var(--text-secondary-color);
+    text-align: center;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  
+  .placeholder-section i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+  }

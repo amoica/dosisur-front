@@ -1,0 +1,275 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Diálogo para mostrar imagen completa -->
+<p-dialog header="Imagen" [(visible)]="imageDialogVisible" [modal]="true" [closable]="true" [responsive]="true"
+  styleClass="image-dialog" [style]="{ width: '50vw' }">
+  <img [src]="selectedImage" alt="Imagen completa" style="width: 100%;" />
+</p-dialog>
+
+<div class="p-grid">
+  <!-- Título y descripción -->
+  <div class="p-col-12">
+    <h1 class="page-title">Gestión de Artículos</h1>
+    <p class="page-description">
+      Administra y gestiona fácilmente los insumos. Puedes crear, editar o eliminar insumos y verificar su estado.
+    </p>
+  </div>
+
+  <!-- Barra de herramientas -->
+  <div class="p-col-12 toolbar">
+    <div class="search-wrapper">
+      <input type="text" pInputText [(ngModel)]="globalFilter" placeholder="Buscar artículos" class="search-input" />
+      <button pButton type="button" icon="pi pi-search" class="p-button-outlined search-button"></button>
+    </div>
+    <button pButton label="Nuevo Artículo" icon="pi pi-plus" class="p-button-primary new-articulo-button"
+      (click)="showArticuloDialog()"></button>
+  </div>
+</div>
+
+
+<!-- Tabla de artículos -->
+<p-table [value]="articulos" [paginator]="true" [rows]="10" [globalFilterFields]="['name', 'code']"
+  [responsiveLayout]="'scroll'" [showCurrentPageReport]="true"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} artículos">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Imagen</th>
+      <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="code">Código <p-sortIcon field="code"></p-sortIcon></th>
+      <th>Inventariable</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-articulo>
+    <tr>
+      <!-- Columna de imagen -->
+      <td>
+        <img *ngIf="articulo.imagenUrl" [src]="articulo.imagenUrl" alt="{{ articulo.name }}" class="thumbnail" (click)="openImageDialog(articulo.imagenUrl)" style="cursor: pointer;" />
+      </td>
+      <td>{{ articulo.name }}</td>
+      <td>{{ articulo.code }}</td>
+      <!-- Inventariable: badge verde si es inventoriable, rojo en caso contrario -->
+      <td>
+        <span class="badge" [ngClass]="articulo.isInventoriable ? 'badge-inventoriable' : 'badge-no-inventoriable'">
+          {{ articulo.isInventoriable ? 'Inventariable' : 'No inventariable' }}
+        </span>
+      </td>
+      <!-- Estado: badge azul si está disponible, gris (u otro color vivo) si no -->
+      <td>
+        <span class="badge" [ngClass]="articulo.available ? 'badge-available' : 'badge-unavailable'">
+          <i class="pi" [ngClass]="articulo.available ? 'pi-check-circle' : 'pi-times-circle'"></i>
+          {{ articulo.available ? 'Disponible' : 'No disponible' }}
+        </span>
+      </td>
+      <!-- Acciones: botones diferenciados -->
+      <td>
+        <button pButton icon="pi pi-eye" class="p-button-rounded p-button-info p-mr-2" (click)="goToDetail(articulo.id)"
+          title="Ver Detalle"></button>
+        <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-mr-2"
+          (click)="editArticulo(articulo)" title="Editar"></button>
+        <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger"
+          (click)="deleteArticulo(articulo.id, articulo.name)" title="Eliminar"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Diálogo de Artículo -->
+<p-dialog [(visible)]="articuloDialog" [modal]="true" [closable]="false" [responsive]="true" [style]="{ width: '60vw' }"
+  [header]="articulo.id ? 'Editar Artículo' : 'Nuevo Artículo'">
+  <div class="modal-section">
+    <!-- Sección decorativa con ícono y título -->
+    <div class="decorative-section">
+      <i class="pi pi-box"></i>
+      <h2>{{ articulo.id ? 'Editar Artículo' : 'Nuevo Artículo' }}</h2>
+    </div>
+
+    <hr />
+
+    <!-- Formulario principal del artículo -->
+    <form [formGroup]="articuloForm">
+      <div class="form-grid mb-4">
+        <!-- Nombre -->
+        <div class="p-field">
+          <p-floatlabel variant="on" class="required">
+            <div class="p-input-icon-left">
+              <p-inputicon class="pi pi-box" />
+              <input id="name" type="text" pInputText formControlName="name" />
+            </div>
+            <label for="nombre_articulo">Nombre Articulo</label>
+          </p-floatlabel>
+
+          <small *ngIf="articuloForm.get('name')?.invalid && articuloForm.get('name')?.touched" class="p-error">
+            El nombre es obligatorio.
+          </small>
+        </div>
+
+        <!-- Código -->
+        <div class="p-field">
+          <p-floatlabel variant="on" class="required">
+            <div class="p-input-icon-left">
+              <p-inputicon class="pi pi-key" />
+              <input id="code" type="text" pInputText formControlName="code" />
+            </div>
+            <label for="codigo">Código</label>
+          </p-floatlabel>
+          <small *ngIf="articuloForm.get('code')?.invalid && articuloForm.get('code')?.touched" class="p-error">
+            El código es obligatorio.
+          </small>
+        </div>
+
+        <!-- Descripción -->
+        <div class="p-field p-col-12">
+          <p-floatlabel variant="on" class="required">
+            <div class="p-input-icon-left">
+              <p-inputicon class="pi pi-align-left" />
+              <textarea pTextarea id="description" rows="5" cols="30" formControlName="description"></textarea>
+            </div>
+            <label for="description">Descripción</label>
+          </p-floatlabel>
+
+          <small *ngIf="articuloForm.get('description')?.invalid && articuloForm.get('description')?.touched"
+            class="p-error">
+            La descripción es obligatoria.
+          </small>
+        </div>
+
+        <div class="p-field">
+          <p-floatlabel class="w-full md:w-100" variant="on">
+            <div class="p-input-icon-left">
+              <p-inputicon class="pi pi-plus" />
+              <p-select [options]="unitsOptions" formControlName="unidad" placeholder="Seleccionar Unidad"
+                class="unit-dropdown" [filter]="true" appendTo="body">
+              </p-select>
+            </div>
+            <label for="unidad">Unidad</label>
+          </p-floatlabel>
+        </div>
+
+      </div>
+
+      <!-- Stock Mínimo -->
+
+      <div class="columns-3" style="display: flex; justify-content: space-evenly; align-items: center; gap: 1rem;">
+        <div class="p-field">
+          <p-floatlabel variant="on" class="required">
+            <div class="p-input-icon-left">
+              <p-inputNumber id="minimunStock" formControlName="minimunStock" [min]="0"></p-inputNumber>
+            </div>
+            <label for="unidad">Stock Minimo</label>
+          </p-floatlabel>
+
+        </div>
+
+        <!-- Estado -->
+        <div class="p-field">
+          <p-checkbox id="available" formControlName="available" binary="true" />
+          <label for="available" class="ml-2">Disponible</label>
+        </div>
+
+
+        <!-- Inventariable -->
+        <div class="p-field">
+          <p-checkbox id="isInventoriable" formControlName="isInventoriable" binary="true" />
+          <label for="isInventoriable" class="ml-2">Inventariable</label>
+        </div>
+      </div>
+
+      <p-fileupload name="imageFile" [auto]="false" [multiple]="false" [customUpload]="true" accept="image/*"
+        maxFileSize="1000000" (onSelect)="onFileSelected($event)" styleClass="custom-fileupload"
+        [chooseLabel]="'Subir imagen'" [showUploadButton]="false" [showCancelButton]="false">
+        <ng-template pTemplate="empty">
+          <div class="file-upload-empty">
+            Arrastra y suelta el archivo aquí o haz clic para seleccionar.
+          </div>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <div *ngIf="imagenFile || articulo.imagenUrl">
+            <img [src]="articulo.imagenUrl" alt="Vista previa" class="preview-img" />
+            <!-- Botón para quitar la imagen, que limpie tanto imageFile como articulo.imageUrl -->
+            <button pButton type="button" icon="pi pi-times" (click)="removeImage()" class="p-button-text"></button>
+          </div>
+        </ng-template>
+      </p-fileupload>
+
+    </form>
+
+    <!-- Sección para gestionar proveedores asociados -->
+    <div class="proveedores-card">
+      <h3>Proveedores Asociados</h3>
+      <p-table [value]="insumoProveedores" [responsiveLayout]="'scroll'" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Proveedor</th>
+            <th>Código Proveedor</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rel>
+          <tr>
+            <td>{{ getProveedorName(rel) }}</td>
+            <td>{{ rel.codigoProveedor }}</td>
+            <td>
+              <button pButton icon="pi pi-pencil" class="p-button-text" (click)="editInsumoProveedor(rel)"
+                title="Editar"></button>
+              <button pButton icon="pi pi-trash" class="p-button-text p-button-danger"
+                (click)="deleteInsumoProveedor(rel)" title="Eliminar"></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <button pButton label="Agregar Proveedor" icon="pi pi-plus" class="p-button-sm p-button-secondary"
+        style="margin-top:0.5rem;" (click)="openNewInsumoProveedor()"></button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="modal-footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-secondary"
+      (click)="hideArticuloDialog()"></button>
+    <button pButton label="Guardar" icon="pi pi-check" class="p-button-success" (click)="saveArticulo()"
+      [disabled]="articuloForm.invalid"></button>
+  </footer>
+</p-dialog>
+
+<!-- Modal para crear/editar la relación Insumo-Proveedor -->
+<p-dialog [(visible)]="insumoProveedorDialog"
+  header="{{ insumoProveedor.proveedorId ? 'Editar Proveedor' : 'Nuevo Proveedor' }}"
+  [style]="{ width: '40vw', minHeight: '300px' }" modal="true" [closable]="true" appendTo="body">
+  <!-- Cabecera interna personalizada -->
+  <div class="modal-header">
+    <h3 class="modal-title">Asignar Proveedor al Insumo</h3>
+    <hr />
+  </div>
+
+  <div class="form-grid">
+    <!-- Dropdown para seleccionar proveedor -->
+    <div class="p-field">
+      <label for="proveedorSelect">Proveedor <span class="required">*</span></label>
+      <p-dropdown id="proveedorSelect" [options]="proveedoresList" optionLabel="nombre" optionValue="id"
+        placeholder="Seleccionar proveedor" [(ngModel)]="insumoProveedor.proveedorId" appendTo="body" [filter]="true"
+        [panelStyle]="{ 'max-height': '200px', overflow: 'auto' }" [style]="{'width': '100%'}"
+        styleClass="custom-dropdown"></p-dropdown>
+    </div>
+
+    <!-- Campo para el Código del Proveedor -->
+    <div class="p-field">
+      <label for="codigoProveedor">Código del Proveedor <span class="required">*</span></label>
+      <div class="p-input-icon-left" style="width: 100%;">
+        <i class="pi pi-key"></i>
+        <input id="codigoProveedor" type="text" pInputText [(ngModel)]="insumoProveedor.codigoProveedor"
+          placeholder="Ej: ABC-TXYZ-001" [ngStyle]="{'width': '100%'}" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de Modal -->
+  <footer class="modal-footer">
+    <button pButton label="Cancelar" icon="pi pi-times" class="p-button-secondary"
+      (click)="insumoProveedorDialog = false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" class="p-button-success"
+      (click)="saveInsumoProveedor()"></button>
+  </footer>
+</p-dialog>

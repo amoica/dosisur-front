@@ -1,0 +1,173 @@
+/* General */
+.page-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.page-description {
+  font-size: 1rem;
+  color: var(--text-secondary-color);
+  margin-bottom: 1.5rem;
+}
+
+/* Barra de herramientas */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  width: auto;
+}
+
+.new-deposito-button {
+  margin-left: 1rem;
+}
+
+/* Modal */
+.modal-section {
+  margin: 0 auto;
+  width: 80%;
+  margin-bottom: 2rem;
+}
+
+.decorative-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.decorative-section i {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-right: 1rem;
+}
+
+.decorative-section h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--text-secondary-color);
+  margin: 1rem 0;
+}
+
+/* Formulario */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.p-field {
+  margin-bottom: 1rem;
+}
+
+.required {
+  color: var(--danger-color);
+}
+
+.p-input-icon-left {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.p-input-icon-left .pi {
+  position: absolute;
+  left: 0.8rem; /* Ajustar posición horizontal */
+  top: 50%; /* Centrar verticalmente */
+  transform: translateY(-50%);
+  color: var(--primary-color);
+  font-size: 1.2rem; /* Tamaño del ícono */
+}
+
+.p-input-icon-left input,
+.p-input-icon-left textarea {
+  padding-left: 2.5rem; /* Espacio para el ícono */
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--text-secondary-color);
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  height: 2.5rem;
+}
+
+.p-input-icon-left input:focus,
+.p-input-icon-left textarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Área de texto */
+textarea.p-inputtextarea {
+  resize: none;
+  min-height: 100px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--text-secondary-color);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+textarea.p-inputtextarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+}
+
+.badge-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Botones */
+.p-button-secondary {
+  background-color: var(--text-secondary-color);
+  border: none;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Responsive ajustes */
+@media (max-width: 768px) {
+  .form-grid {
+      grid-template-columns: 1fr;
+  }
+}

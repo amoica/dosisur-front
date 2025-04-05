@@ -1,0 +1,36 @@
+:host ::ng-deep .ui-dialog {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  
+  .general-info p {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .seccion-card {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #fafafa;
+  }
+  
+  .seccion-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0.3rem;
+  }
+  
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 1rem;
+  }
+  
+  .button-group p-button {
+    margin-right: 1rem;
+  }
+  

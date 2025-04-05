@@ -1,0 +1,181 @@
+/* Título y descripción */
+.page-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.page-description {
+  font-size: 1rem;
+  color: var(--text-secondary-color);
+  margin-bottom: 1.5rem;
+}
+
+/* Barra de herramientas */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  width: auto;
+}
+
+.new-client-button {
+  margin-left: 1rem;
+}
+
+/* Modal */
+.p-dialog footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modal-section {
+  margin-bottom: 2rem;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--text-secondary-color);
+  margin: 1rem 0;
+}
+
+
+
+/* Diseño compacto: dos columnas */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* Dos columnas */
+  gap: 1.5rem;
+}
+
+.form-grid .p-field {
+  margin-bottom: 1rem;
+}
+
+.required {
+  color: var(--danger-color);
+}
+
+
+/* Ajuste del contenedor del formulario */
+.p-dialog .modal-section {
+  margin-left: 2rem;
+  /* Margen izquierdo para separar del borde */
+  margin-right: 2rem;
+  /* Margen derecho para consistencia */
+}
+
+/* Observaciones y su área de texto */
+.p-field-observaciones {
+  grid-column: 1 / span 2;
+  /* Toma todo el ancho en la fila */
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+  /* Ajustar la altura */
+  padding: 0.5rem;
+}
+
+
+
+/* Centrar el formulario dentro del diálogo */
+.modal-section {
+  margin: 0 auto;
+  /* Centra horizontalmente */
+  width: 80%;
+  /* Define un ancho fijo para el formulario */
+}
+
+/* Ajuste general */
+.decorative-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.decorative-section i {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-right: 1rem;
+}
+
+.decorative-section h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.p-grid .p-field {
+  margin-bottom: 1.5rem;
+}
+
+.p-input-icon-left {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.p-input-icon-left .pi {
+  position: absolute;
+  left: 0.5rem;
+  color: var(--primary-color);
+}
+
+.p-input-icon-left input {
+  padding-left: 2.5rem;
+}
+
+/* Ajuste general de inputs */
+.p-inputtext {
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--text-secondary-color);
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-inputtext:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+  /* Área de texto */
+  textarea.p-inputtextarea {
+    resize: none;
+    min-height: 100px;
+    padding: 0.5rem;
+  }
+
+/* Footer del modal */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}

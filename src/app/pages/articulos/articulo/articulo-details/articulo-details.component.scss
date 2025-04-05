@@ -1,0 +1,140 @@
+.detail-container {
+  margin: 1rem auto;
+  max-width: 1100px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Top Navigation */
+.top-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.header-image {
+  width: 120px;
+  height: 120px;
+  margin-right: 1.5rem;
+}
+
+.header-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+}
+
+.header-icon {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-right: 1.5rem;
+}
+
+.header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.article-name {
+  margin: 0;
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.info-item {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #eee;
+}
+
+.info-item label {
+  font-weight: bold;
+  color: var(--primary-color);
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.info-item span {
+  color: #555;
+  word-break: break-word;
+}
+
+/* Placeholder Sections */
+.placeholder-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: var(--text-secondary-color);
+  text-align: center;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.placeholder-section i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .detail-container {
+    padding: 1rem;
+  }
+  .header-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  .header-image, .header-icon {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  .header-info {
+    text-align: center;
+    width: 100%;
+  }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

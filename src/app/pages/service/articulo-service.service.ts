@@ -1,0 +1,59 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+
+export interface Articulo {
+  id: number;
+  name: string;
+  code: string;
+  description: string;
+  minimunStock: number;
+  available: boolean;
+  unidad:string,
+  isInventoriable?: boolean;
+  imagenUrl?:string;
+  // … otros campos si los necesitas
+  insumoProveedor?: Array<{
+    proveedorId: number;
+    codigoProveedor: string;
+    precioUnitario?: number | null;
+    fechaActualizacion: Date;
+    // Si deseas, podrías tener una propiedad "proveedor" con los datos completos
+    proveedor?: { id: number; nombre: string; /* … otros campos */ };
+  }>;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ArticuloServiceService {
+
+  private apiUrl = 'http://localhost:3000/api/insumos';
+
+  constructor(private http: HttpClient) { }
+
+  getArticulos() {
+    return this.http.get(this.apiUrl);
+  }
+
+  getArticuloById(id: number) {
+    return this.http.get(this.apiUrl + '/' + id);
+  }
+
+  createArticulo(articulo: any) {
+    console.log(articulo);
+    return this.http.post(this.apiUrl, articulo);
+  }
+
+  updateArticulo(idArticulo: string, articulo: any) {
+    console.log(articulo);
+    return this.http.patch(this.apiUrl + '/' + idArticulo, articulo);
+  }
+
+  deleteArticulo(id: number) {
+    return this.http.delete(this.apiUrl + '/' + id);
+  }
+
+  toggleDisponibilidad(){
+    //
+  }
+}

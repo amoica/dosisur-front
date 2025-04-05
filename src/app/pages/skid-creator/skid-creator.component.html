@@ -1,0 +1,280 @@
+<div class="skid-creator-container">
+  <p-tabView>
+    <!-- TAB: Crear Skid -->
+    <p-tabPanel header="Crear Skid">
+      <form [formGroup]="skidForm" (ngSubmit)="onSubmit()">
+        <!-- Datos Generales -->
+        <p-panel header="Datos Generales" class="mb-4">
+          <div class="form-grid mt-2">
+            <div class="form-field">
+              <label for="nombre">Nombre del Skid</label>
+              <input id="nombre" type="text" pInputText formControlName="nombre" placeholder="Ingrese nombre" />
+            </div>
+            <div class="form-field">
+              <label for="codigo">Código</label>
+              <input id="codigo" type="text" pInputText formControlName="codigo" placeholder="Ingrese código" />
+            </div>
+            <!-- Nuevo campo: Tipo -->
+            <div class="form-field">
+              <label for="tipoSkid">Tipo</label>
+              <p-dropdown id="tipoSkid" formControlName="tipo" [options]="tipoOptions" optionLabel="label"
+                optionValue="value" placeholder="Seleccione Tipo"></p-dropdown>
+            </div>
+            <!-- Nuevo campo: Lts Capacidad del tanque -->
+            <div class="form-field">
+              <label for="lts">Lts Capacidad del tanque</label>
+              <p-dropdown id="lts" formControlName="lts" [options]="capacidadOptions"
+                optionLabel="label" optionValue="value" placeholder="Seleccione Capacidad"></p-dropdown>
+            </div>
+            <div class="form-field">
+              <p-fileupload name="imagenes" [customUpload]="true" (onSelect)="onFilesSelected($event)" accept="image/*"
+                [showUploadButton]="false" [showCancelButton]="false" [chooseLabel]="'Elegir Imágenes'"
+                [multiple]="true" [maxFileSize]="1000000" mode="basic" class="custom-fileupload-input">
+              </p-fileupload>
+              <!-- Vista previa de imágenes -->
+              <div class="images-preview" *ngIf="imagePreviews.length">
+                <div class="image-row" *ngFor="let img of imagePreviews; let i = index">
+                  <div class="thumbnail">
+                    <img [src]="img" alt="Vista previa" />
+                  </div>
+                  <div class="file-info" *ngIf="selectedFile && selectedFile[i]">
+                    <span class="file-name">{{ selectedFile[i].name }}</span>
+                  </div>
+                  <div class="remove-button">
+                    <button pButton icon="pi pi-times" class="custom-delete-button" (click)="removeImage(i)"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-panel>
+
+        <!-- Secciones del Skid -->
+        <div formArrayName="secciones" class="mt-4">
+          <div *ngFor="let seccion of secciones.controls; let i = index" [formGroupName]="i" class="section-card mt-4">
+            <p-panel
+              [header]=" seccion.get('nombre')?.value || (seccion.get('tipo')?.value === 'receta' ? 'Sección basada en Receta' : 'Sección Personalizada') "
+              class="mb-3">
+              <!-- Sección basada en receta -->
+              <div class="section-header" *ngIf="seccion.get('tipo')?.value === 'receta'">
+                <label>Seleccionar Componente Base:</label>
+                <p-dropdown formControlName="baseComponenteId" [options]="recetas" optionLabel="nombre" optionValue="id"
+                  placeholder="Seleccione Componente" [filter]="true" filterPlaceholder="Buscar..." class="mt-2"
+                  (onChange)="onRecetaChange(i, $event.value)">
+                </p-dropdown>
+              </div>
+              <!-- Sección personalizada -->
+              <div class="section-header" *ngIf="seccion.get('tipo')?.value === 'personalizada'">
+                <label>Nombre de la Sección:</label>
+                <input type="text" pInputText formControlName="nombre" placeholder="Ingrese nombre de la sección"
+                  class="mt-2" />
+              </div>
+
+              <!-- Lista de ítems (insumos) -->
+              <div formArrayName="items" class="items-container">
+                <div *ngFor="let item of getItems(i).controls; let j = index" [formGroupName]="j" class="item-row">
+                  <div class="item-field">
+                    <p-dropdown formControlName="insumoId" [options]="articulos" optionLabel="name" optionValue="id"
+                      placeholder="Seleccione insumo" [filter]="true" filterPlaceholder="Buscar...">
+                    </p-dropdown>
+                  </div>
+                  <div class="item-field" style="max-width: 100px;">
+                    <input type="number" pInputText formControlName="cantidad" placeholder="Cantidad" />
+                  </div>
+                  <div class="item-actions">
+                    <p-button icon="pi pi-trash" severity="danger" class="custom-delete-button"
+                      (click)="removeItem(i, j)"></p-button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones de acción en la sección -->
+              <div class="button-group section-button-group">
+                <p-button label="Agregar Ítem" icon="pi pi-plus" class="custom-add-item-button p-button-outlined"
+                  (click)="addItem(i)">
+                </p-button>
+                <p-button label="Eliminar Sección" severity="danger" icon="pi pi-trash" class="custom-delete-button"
+                  (click)="removeSeccion(i)">
+                </p-button>
+              </div>
+            </p-panel>
+          </div>
+        </div>
+
+        <!-- Botones para agregar secciones -->
+        <div class="button-group add-section-buttons">
+          <p-button label="Agregar Componente" icon="pi pi-plus" class="custom-add-section-button p-button-primary"
+            (click)="addSeccion('receta')">
+          </p-button>
+          <p-button label="Agregar Componente Personalizado" icon="pi pi-plus"
+            class="custom-add-section-button p-button-secondary" (click)="addSeccion('personalizada')">
+          </p-button>
+        </div>
+
+        <div class="form-actions">
+          <p-button label="Crear Skid" icon="pi pi-check" type="submit" class="custom-create-button">
+          </p-button>
+        </div>
+      </form>
+    </p-tabPanel>
+
+    <!-- TAB: Listado de Skids -->
+    <p-tabPanel header="Listado de Skids">
+      <p-table [value]="skids" [paginator]="true" [rows]="10">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Tipo</th>
+            <th>Lts Capacidad</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-skid>
+          <tr>
+            <!-- Columna de Imagen -->
+            <td>
+              <img *ngIf="skid.imagen" [src]="skid.imagen" alt="Imagen" class="thumbnail-table"
+                style="cursor: pointer; max-width: 60px; max-height: 60px; border: 1px solid #ccc; border-radius: 4px;"
+                (click)="openImageDialog(skid.imagen)" />
+            </td>
+            <td>{{ skid.nombre }}</td>
+            <td>{{ skid.codigo }}</td>
+            <td>{{ skid.tipo }}</td>
+            <td>{{ skid.lts }}</td>
+            <td>
+              <p-button label="Ver Detalle" icon="pi pi-search" class="p-button-text" (click)="openDetailDialog(skid)"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <app-skid-detail-dialog [skid]="selectedSkid" [(visible)]="detailDialogVisible"></app-skid-detail-dialog>
+
+
+    </p-tabPanel>
+  </p-tabView>
+
+  <!-- Diálogo de Confirmación para Resumen del Skid -->
+  <p-dialog header="Confirmar Creación de Skid" [(visible)]="confirmDialogVisible" modal="true" [draggable]="false"
+    [resizable]="false" [baseZIndex]="10000" [style]="{ width: '900px', maxHeight: '80vh' }"
+    styleClass="confirm-dialog">
+    <div class="dialog-content">
+      <div class="dialog-body" style="display: flex; align-items: flex-start;">
+        <!-- Sección de información del Skid -->
+        <div style="flex: 1;">
+          <h2 class="dialog-title">Resumen del Skid</h2>
+          <div class="dialog-info">
+            <p><strong>Nombre:</strong> {{ skidForm.get('nombre')?.value }}</p>
+            <p><strong>Código:</strong> {{ skidForm.get('codigo')?.value }}</p>
+            <p><strong>Tipo:</strong> {{ skidForm.get('tipo')?.value }}</p>
+            <p><strong>Capacidad del Tanque:</strong> {{ skidForm.get('lts')?.value }}</p>
+          </div>
+        </div>
+        <!-- Sección de miniatura de imagen -->
+        <div *ngIf="imagePreviews && imagePreviews.length" style="margin-left: 20px;">
+          <img [src]="imagePreviews[0]" alt="Vista previa" class="thumbnail-preview"
+            style="cursor: pointer; max-width: 100px; max-height: 100px; border: 1px solid #ccc; border-radius: 4px;"
+            (click)="openImageDialog(imagePreviews[0])" />
+        </div>
+      </div>
+
+      <!-- Tabla principal con row expansion -->
+      <p-table [value]="skidForm.get('secciones')?.value || []" dataKey="id" [expandedRowKeys]="expandedRows"
+        (onRowExpand)="onRowExpand($event)" (onRowCollapse)="onRowCollapse($event)" styleClass="summary-table">
+        <!-- Encabezado -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 2rem"></th>
+            <th>ID</th>
+            <th>Nombre Componente</th>
+            <th>Tipo</th>
+            <th>Código Componente</th>
+            <th style="width: 7rem;">Agregar a Lista</th>
+          </tr>
+        </ng-template>
+        <!-- Cuerpo -->
+        <ng-template pTemplate="body" let-seccion let-expanded="expanded" let-rowIndex="rowIndex">
+          <tr>
+            <td>
+              <p-button type="button" pRipple [pRowToggler]="seccion" [text]="true" [rounded]="true" [plain]="true"
+                [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
+              </p-button>
+            </td>
+            <td>{{ seccion.id }}</td>
+            <td>{{ seccion.nombre }}</td>
+            <td>
+              <ng-container *ngIf="seccion.tipo === 'receta'; else personalBlock">
+                <i class="pi pi-book" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                Basada en Receta
+              </ng-container>
+              <ng-template #personalBlock>
+                <i class="pi pi-user-edit" style="color: #ff9800; margin-right: 0.5rem;"></i>
+                Personalizada
+              </ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="seccion.tipo === 'personalizada'">
+                <input type="text" pInputText [(ngModel)]="customSectionCodes[rowIndex]"
+                  placeholder="Código Componente" />
+              </ng-container>
+              <ng-container *ngIf="seccion.tipo === 'receta'">
+                {{ seccion.codigoComponente }}
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="seccion.tipo != 'receta'">
+                <p-checkbox name="customCheckbox{{rowIndex}}" [(ngModel)]="customSectionAdd[rowIndex]" [binary]="true">
+                </p-checkbox> </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <!-- Fila expandida: muestra ítems de la sección -->
+        <ng-template pTemplate="expandedrow" let-seccion>
+          <tr>
+            <td colspan="6">
+              <div class="expansion-content">
+                <p><strong>Ítems de la Sección:</strong></p>
+                <p-table [value]="seccion.items" dataKey="insumoId">
+                  <ng-template pTemplate="header">
+          <tr>
+            <th>Código</th>
+            <th>Nombre Insumo</th>
+            <th>Cantidad</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td>{{ getArticuloCode(item.insumoId) }}</td>
+            <td>{{ getArticuloName(item.insumoId) }}</td>
+            <td>{{ item.cantidad }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+    </td>
+    </tr>
+    </ng-template>
+    </p-table>
+
+    <p class="dialog-footer-text">
+      ¿Desea confirmar la creación del Skid? Se crearán nuevos componentes para las secciones personalizadas que
+      marques.
+    </p>
+</div>
+
+<!-- Footer con botones -->
+<ng-template pTemplate="footer">
+  <div class="dialog-actions">
+    <p-button label="Revisar" icon="pi pi-undo" class="p-button-secondary"
+      (click)="confirmDialogVisible = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" class="p-button-success" (click)="confirmCreateSkid()"></p-button>
+  </div>
+</ng-template>
+</p-dialog>
+</div>
+
+<p-dialog header="Imagen" [(visible)]="imageDialogVisible" modal="true" [closable]="true" [style]="{ width: '600px' }">
+  <img *ngIf="enlargedImageUrl" [src]="enlargedImageUrl" alt="Imagen Ampliada" style="width: 100%; height: auto;" />
+</p-dialog>

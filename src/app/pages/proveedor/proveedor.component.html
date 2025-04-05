@@ -1,0 +1,486 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="p-grid">
+    <!-- Título y descripción -->
+    <div class="p-col-12">
+        <h1 class="page-title">Gestión de Proveedores</h1>
+        <p class="page-description">
+            Administra y gestiona fácilmente la información de tus proveedores.  
+            Realiza búsquedas, crea nuevos proveedores o edita los existentes.
+        </p>
+    </div>
+
+    <!-- Barra de herramientas -->
+    <div class="p-col-12 toolbar">
+        <div class="search-wrapper">
+            <input
+                type="text"
+                pInputText
+                [(ngModel)]="globalFilter"
+                placeholder="Buscar Proveedor"
+                class="search-input"
+            />
+            <button
+                pButton
+                type="button"
+                icon="pi pi-search"
+                class="p-button-outlined search-button"
+            ></button>
+        </div>
+        <button
+            pButton
+            label="Nuevo Proveedor"
+            icon="pi pi-plus"
+            class="p-button-primary new-articulo-button"
+            (click)="openNew()"
+        ></button>
+    </div>
+</div>
+
+<!-- Tabla de proveedores -->
+<p-table
+  [value]="proveedores"
+  [paginator]="true"
+  [rows]="5"
+  [globalFilterFields]="['nombre', 'email', 'telefono', 'direccion']"
+  [sortMode]="'multiple'"
+  [responsiveLayout]="'scroll'"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} proveedores"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="nombre">
+        Nombre <p-sortIcon field="nombre"></p-sortIcon>
+      </th>
+      <th pSortableColumn="email">
+        Email <p-sortIcon field="email"></p-sortIcon>
+      </th>
+      <th pSortableColumn="telefono">
+        Teléfono <p-sortIcon field="telefono"></p-sortIcon>
+      </th>
+      <th pSortableColumn="direccion">
+        Dirección <p-sortIcon field="direccion"></p-sortIcon>
+      </th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-proveedor>
+    <tr>
+      <td>{{ proveedor.nombre }}</td>
+      <td>{{ proveedor.email }}</td>
+      <td>{{ proveedor.telefono }}</td>
+      <td>{{ proveedor.direccion }}</td>
+      <td class="table-actions">
+        <button
+          pButton
+          icon="pi pi-eye"
+          class="p-button-rounded p-button-info"
+          (click)="goToDetail(proveedor.id)"
+          title="Ver Detalle"
+        ></button>
+        <button
+          pButton
+          icon="pi pi-pencil"
+          class="p-button-rounded p-button-warning"
+          (click)="editProveedor(proveedor)"
+          title="Editar"
+        ></button>
+        <button
+          pButton
+          icon="pi pi-trash"
+          class="p-button-rounded p-button-danger"
+          (click)="deleteProveedor(proveedor)"
+          title="Eliminar"
+        ></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+
+<!-- Diálogo para ver/crear/editar Proveedor -->
+<p-dialog
+    [(visible)]="proveedorDialog"
+    [modal]="true"
+    [closable]="false"
+    [responsive]="true"
+    [style]="{ width: '60vw' }"
+    header="{{ isEdit ? 'Editar Proveedor' : 'Nuevo Proveedor' }}"
+>
+    <div class="modal-section">
+        <div class="decorative-section">
+            <i class="pi pi-id-card"></i>
+            <h2>{{ isEdit ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+        </div>
+
+        <hr />
+
+        <div class="form-grid">
+            <!-- Nombre -->
+            <div class="p-field">
+                <label for="nombre">Nombre <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-user"></i>
+                    <input
+                        id="nombre"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.nombre"
+                        placeholder="Nombre completo o razón social"
+                        required
+                    />
+                </div>
+                <small *ngIf="submitted && !proveedor.nombre" class="p-error">
+                    El nombre es obligatorio.
+                </small>
+            </div>
+
+            <!-- Email -->
+            <div class="p-field">
+                <label for="email">Email <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-envelope"></i>
+                    <input
+                        id="email"
+                        type="email"
+                        pInputText
+                        [(ngModel)]="proveedor.email"
+                        placeholder="Correo electrónico"
+                        required
+                    />
+                </div>
+                <small *ngIf="submitted && !proveedor.email" class="p-error">
+                    El email es obligatorio.
+                </small>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="p-field">
+                <label for="telefono">Teléfono <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-phone"></i>
+                    <input
+                        id="telefono"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.telefono"
+                        placeholder="Teléfono principal"
+                        required
+                    />
+                </div>
+                <small *ngIf="submitted && !proveedor.telefono" class="p-error">
+                    El teléfono es obligatorio.
+                </small>
+            </div>
+
+            <!-- Dirección -->
+            <div class="p-field">
+                <label for="direccion">Dirección</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-map-marker"></i>
+                    <input
+                        id="direccion"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.direccion"
+                        placeholder="Dirección completa"
+                    />
+                </div>
+            </div>
+
+            <!-- Ciudad -->
+            <div class="p-field">
+                <label for="ciudad">Ciudad</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-building"></i>
+                    <input
+                        id="ciudad"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.ciudad"
+                        placeholder="Ciudad"
+                    />
+                </div>
+            </div>
+
+            <!-- Provincia -->
+            <div class="p-field">
+                <label for="provincia">Provincia</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-globe"></i>
+                    <input
+                        id="provincia"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.provincia"
+                        placeholder="Provincia"
+                    />
+                </div>
+            </div>
+
+            <!-- Código Postal -->
+            <div class="p-field">
+                <label for="codigoPostal">Código Postal</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-tag"></i>
+                    <input
+                        id="codigoPostal"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.codigoPostal"
+                        placeholder="Código Postal"
+                    />
+                </div>
+            </div>
+
+            <!-- CUIT -->
+            <div class="p-field">
+                <label for="cuit">CUIT</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-id-card"></i>
+                    <input
+                        id="cuit"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.cuit"
+                        placeholder="CUIT"
+                    />
+                </div>
+            </div>
+
+            <!-- Condición Fiscal -->
+            <div class="p-field">
+                <label for="condicionFiscal">Condición Fiscal</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-briefcase"></i>
+                    <input
+                        id="condicionFiscal"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.condicionFiscal"
+                        placeholder="Ej: Monotributo, Resp. Inscripto"
+                    />
+                </div>
+            </div>
+
+            <!-- Tipo de Proveedor -->
+            <div class="p-field">
+                <label for="tipoProveedor">Tipo de Proveedor</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-cog"></i>
+                    <input
+                        id="tipoProveedor"
+                        type="text"
+                        pInputText
+                        [(ngModel)]="proveedor.tipoProveedor"
+                        placeholder="Ej: Servicios, Productos"
+                    />
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="p-field p-field-observaciones">
+                <label for="observaciones">Observaciones</label>
+                <textarea
+                    id="observaciones"
+                    rows="3"
+                    pInputTextarea
+                    [(ngModel)]="proveedor.observaciones"
+                    placeholder="Notas internas u observaciones"
+                ></textarea>
+            </div>
+        </div>
+
+        <!-- Sub-sección para Contactos -->
+        <h3 style="margin-top:1.5rem;">Contactos</h3>
+        <p-table
+            [value]="proveedor.contactos || []" 
+            [responsiveLayout]="'scroll'"
+            styleClass="p-datatable-sm"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Cargo</th>
+                    <th>Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-cont>
+                <tr>
+                    <td>{{ cont.nombre }}</td>
+                    <td>{{ cont.email }}</td>
+                    <td>{{ cont.telefono }}</td>
+                    <td>{{ cont.cargo }}</td>
+                    <td>
+                        <button
+                            pButton
+                            icon="pi pi-pencil"
+                            class="p-button-text p-button-rounded"
+                            (click)="editContacto(cont)"
+                        ></button>
+                        <button
+                            pButton
+                            icon="pi pi-trash"
+                            class="p-button-text p-button-rounded p-button-danger"
+                            (click)="deleteContacto(cont)"
+                        ></button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <button
+            pButton
+            label="Agregar Contacto"
+            icon="pi pi-plus"
+            class="p-button-sm p-button-secondary"
+            style="margin-top:0.5rem;"
+            (click)="openNewContacto()"
+        ></button>
+    </div>
+
+    <footer class="modal-footer">
+        <button
+            pButton
+            label="Cancelar"
+            icon="pi pi-times"
+            class="p-button-secondary"
+            (click)="hideDialog()"
+        ></button>
+        <button
+            pButton
+            label="Guardar"
+            icon="pi pi-check"
+            class="p-button-success"
+            (click)="saveProveedor()"
+            [disabled]="!proveedor.nombre || !proveedor.email || !proveedor.telefono"
+        ></button>
+    </footer>
+</p-dialog>
+
+<!-- Modal para crear/editar Contacto -->
+<p-dialog
+    [(visible)]="contactoDialog"
+    [modal]="true"
+    [closable]="true"
+    header="{{ isEditContacto ? 'Editar Contacto' : 'Nuevo Contacto' }}"
+    [responsive]="true"
+    [style]="{ width: '40vw' }"
+>
+    <div class="form-grid">
+        <div class="p-field">
+            <label for="contactoNombre">Nombre <span class="required">*</span></label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-user"></i>
+                <input
+                    id="contactoNombre"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="contacto.nombre"
+                    placeholder="Nombre del contacto"
+                    required
+                />
+            </div>
+        </div>
+        <div class="p-field">
+            <label for="contactoEmail">Email</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-envelope"></i>
+                <input
+                    id="contactoEmail"
+                    type="email"
+                    pInputText
+                    [(ngModel)]="contacto.email"
+                    placeholder="Correo electrónico"
+                />
+            </div>
+        </div>
+        <div class="p-field">
+            <label for="contactoTelefono">Teléfono</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-phone"></i>
+                <input
+                    id="contactoTelefono"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="contacto.telefono"
+                    placeholder="Teléfono"
+                />
+            </div>
+        </div>
+        <div class="p-field">
+            <label for="contactoCargo">Cargo</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-briefcase"></i>
+                <input
+                    id="contactoCargo"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="contacto.cargo"
+                    placeholder="Cargo o posición"
+                />
+            </div>
+        </div>
+        <div class="p-field">
+            <label for="contactoObservaciones">Observaciones</label>
+            <textarea
+                id="contactoObservaciones"
+                rows="2"
+                pInputTextarea
+                [(ngModel)]="contacto.observaciones"
+                placeholder="Notas u observaciones"
+            ></textarea>
+        </div>
+    </div>
+
+    <footer class="modal-footer">
+        <button
+            pButton
+            label="Cancelar"
+            icon="pi pi-times"
+            class="p-button-secondary"
+            (click)="hideContactoDialog()"
+        ></button>
+        <button
+            pButton
+            label="Guardar"
+            icon="pi pi-check"
+            class="p-button-success"
+            (click)="saveContacto()"
+        ></button>
+    </footer>
+</p-dialog>
+
+<!-- Modal para ver (solo lectura) un proveedor -->
+<p-dialog
+    [(visible)]="viewDialog"
+    [modal]="true"
+    [closable]="true"
+    [responsive]="true"
+    [style]="{ width: '50vw' }"
+    header="Detalle de Proveedor"
+>
+    <div *ngIf="proveedor" class="p-fluid">
+        <h2>{{ proveedor.nombre }}</h2>
+        <p><strong>Email:</strong> {{ proveedor.email }}</p>
+        <p><strong>Teléfono:</strong> {{ proveedor.telefono }}</p>
+        <p><strong>Dirección:</strong> {{ proveedor.direccion }}</p>
+        <p><strong>Ciudad:</strong> {{ proveedor.ciudad }}</p>
+        <p><strong>Provincia:</strong> {{ proveedor.provincia }}</p>
+        <p><strong>CUIT:</strong> {{ proveedor.cuit }}</p>
+        <p><strong>Condición Fiscal:</strong> {{ proveedor.condicionFiscal }}</p>
+        <p><strong>Tipo Proveedor:</strong> {{ proveedor.tipoProveedor }}</p>
+        <p><strong>Observaciones:</strong> {{ proveedor.observaciones }}</p>
+
+        <h3>Contactos</h3>
+        <ul>
+            <li *ngFor="let c of proveedor.contactos">
+                <strong>{{ c.nombre }}</strong> - {{ c.email }} | {{ c.telefono }}
+                <span *ngIf="c.cargo"> ({{ c.cargo }})</span>
+            </li>
+        </ul>
+    </div>
+</p-dialog>
