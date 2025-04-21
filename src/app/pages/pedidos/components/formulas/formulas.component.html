@@ -1,0 +1,88 @@
+<p-fieldset [legend]="nombreComponente" [toggleable]="true" class="fieldset-contenedor">
+
+    <form [formGroup]="recetaForm">
+  
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="items">
+          <tr *ngFor="let fg of items.controls; let i = index" [formGroupName]="i">
+            
+            <!-- ROW SIN CONFIRMAR -->
+            <ng-container *ngIf="!fg.get('confirmed')!.value; else rowConfirmed">
+              <td>
+                <p-dropdown
+                  formControlName="insumoId"
+                  [options]="coleccionItems"
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Seleccione ítem"
+                  [filter]="true"
+                  filterPlaceholder="Buscar...">
+                </p-dropdown>
+              </td>
+              
+              <td>
+                <input type="number"
+                       pInputText
+                       formControlName="cantidad"
+                       min="1"
+                       placeholder="0" />
+              </td>
+              
+              <td class="actions-cell">
+                <button pButton
+                        type="button"
+                        icon="pi pi-check"
+                        class="p-button-success"
+                        (click)="confirmItem(i)">
+                </button>
+                <button pButton
+                        type="button"
+                        icon="pi pi-trash"
+                        class="p-button-secondary ml-2"
+                        (click)="removeItem(i)">
+                </button>
+              </td>
+            </ng-container>
+            
+            <!-- ROW CONFIRMADA -->
+            <ng-template #rowConfirmed>
+              <td>{{ getItemName(fg.get('insumoId')!.value) }}</td>
+              <td>
+                <input type="number"
+                       pInputText
+                       formControlName="cantidad"
+                       min="1" />
+              </td>
+              <td class="actions-cell">
+                <button pButton
+                        type="button"
+                        icon="pi pi-trash"
+                        severity="danger"
+                        (click)="removeItem(i)">
+                </button>
+              </td>
+            </ng-template>
+            
+          </tr>
+        </tbody>
+      </table>
+  
+      <div class="section-button-group">
+        <button pButton
+                type="button"
+                icon="pi pi-plus"
+                label="Agregar Ítem"
+                (click)="addItem()">
+        </button>
+      </div>
+    </form>
+  
+  </p-fieldset>
+  

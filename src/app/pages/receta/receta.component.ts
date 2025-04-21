@@ -18,6 +18,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { PickListModule } from 'primeng/picklist';
 import { FileUpload } from 'primeng/fileupload';
 import { Select, SelectModule} from 'primeng/select';
+import { SpellCheckService } from '../../core/service/spell-check.service';
 
 @Component({
   selector: 'app-receta',
@@ -60,6 +61,10 @@ export class RecetaComponent implements OnInit {
   dialogEditMode = false;
   newTipo: string = '';
   showNewTipoDialog: boolean = false;
+  showValidationDialog: boolean = false; // Para el diálogo de validación profesional
+
+  suggestions: string[] = [];
+
 
 
   tipos: any[] = [];
@@ -68,7 +73,8 @@ export class RecetaComponent implements OnInit {
     private recetaService: RecetaService,
     private articuloService: ArticuloServiceService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private spellCheckService: SpellCheckService
   ) {}
 
   ngOnInit(): void {
@@ -120,40 +126,78 @@ export class RecetaComponent implements OnInit {
   }
 
   onTipoChange(event: any) {
-    // Verifica si se seleccionó la opción "Agregar Nuevo..."
     if (event.value && event.value === 'Agregar Nuevo...') {
-      // Muestra el modal para ingresar un nuevo tipo.
-      this.newTipo = ''; // Limpia el campo
+      this.newTipo = '';
       this.showNewTipoDialog = true;
     }
   }
+  // Este método se encarga de obtener las sugerencias en tiempo real mientras el usuario escribe
+  onTipoInputChange(): void {
 
+  }
 
-  acceptNewTipo() {
-    if (this.newTipo.trim()) {
-      // Inserta el nuevo tipo justo antes de la opción "Agregar Nuevo..."
-      this.tipos.splice(this.tipos.length - 1, 0, this.newTipo.trim());
-      // Asigna el nuevo tipo al modelo.
-      this.recetaForm.tipo = this.newTipo.trim();
-      // Oculta el modal.
-      this.showNewTipoDialog = false;
+  // Permite que, al hacer clic en una sugerencia, se complete automáticamente el campo
+  selectSuggestion(suggestion: string): void {
+    this.newTipo = suggestion;
+    this.suggestions = [];
+  }
+
+ 
+  acceptNewTipo(): void {
+    const trimmedTipo = this.newTipo.trim().toLowerCase();
+    if (!trimmedTipo) {
+      return; // No hace nada si el input está vacío
+    }
+    
+    const { valid, suggestions } = this.spellCheckService.checkWord(trimmedTipo);
+    
+    // Si la palabra no es válida y existen sugerencias, muestra el diálogo de confirmación
+    if (!valid && suggestions && suggestions.length) {
+      // Utilizamos el diálogo de confirmación para darle al usuario la opción de aceptar la palabra tal como está,
+      // o cancelar y corregirla.
+      this.confirmationService.confirm({
+        header: 'Posible Error Ortográfico',
+        icon: 'pi pi-exclamation-triangle',
+        message: `La palabra "${trimmedTipo}" parece estar mal escrita.\nSugerencias: ${suggestions.join(', ')}\n¿Desea continuar de todas formas?`,
+        acceptLabel: 'Sí, continuar',
+        rejectLabel: 'Cancelar',
+        accept: () => {
+          // El usuario elige proceder con la palabra ingresada
+          this.addTipo(trimmedTipo);
+        },
+        reject: () => {
+          // El usuario cancela para corregir la entrada, se puede dejar como está para que modifique manualmente
+        }
+      });
+    } else {
+      // Si la palabra es válida o no hay sugerencias, se agrega directamente
+      this.addTipo(trimmedTipo);
     }
   }
 
-  cancelNewTipo() {
-    // Si se cancela, simplemente oculta el modal y restablece la selección.
+  addTipo(tipo: string): void {
+    // Inserta el nuevo tipo justo antes de la opción "Agregar Nuevo..."
+    this.tipos.splice(this.tipos.length - 1, 0, tipo);
+    // Asigna el nuevo tipo al modelo del formulario
+    this.recetaForm.tipo = tipo;
+    // Cierra el modal y resetea los valores
     this.showNewTipoDialog = false;
-    this.recetaForm.tipo = null;
-
-    // Puedes opcionalmente restablecer recetaForm.tipo o mantener la selección anterior.
+    this.newTipo = '';
   }
 
-  onDialogHide() {
-    // Cuando se cierra el diálogo (por la "X" o de otra forma), resetea la selección
+  cancelNewTipo(): void {
+    this.showNewTipoDialog = false;
+    this.recetaForm.tipo = null;
+    this.newTipo = '';
+  }
+
+  onDialogHide(): void {
     if (this.recetaForm.tipo === 'Agregar Nuevo...') {
       this.recetaForm.tipo = null;
     }
+    this.newTipo = '';
   }
+
 
   setActiveTab(tab: 'create' | 'list'): void {
     this.activeTab = tab;

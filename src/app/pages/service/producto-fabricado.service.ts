@@ -21,9 +21,11 @@ export interface SkidSection {
 }
 
 export interface ProductoFabricado {
+  id?: number;
   nombre: string;
   codigo: string;
   tipo: string;
+  lts?: number;
   secciones: SkidSection[];
 }
 
@@ -50,5 +52,9 @@ export class ProductoFabricadoService {
   // Obtiene el detalle completo de un skid por ID
   getSkid(id: number): Observable<ProductoFabricado> {
     return this.http.get<ProductoFabricado>(`${this.apiUrl}/${id}`);
+  }
+
+  getSkidByTipo(tipo: string): Observable<ProductoFabricado[]> {
+    return this.http.get<ProductoFabricado[]>(`${this.apiUrl}/tipo/${tipo}`);
   }
 }

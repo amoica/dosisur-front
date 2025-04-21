@@ -18,6 +18,7 @@ export const appRoutes: Routes = [
             { path: 'gestion-clientes', loadChildren: () => import('./app/pages/cliente/cliente.route') },
             { path: 'gestion-depositos', loadChildren: () => import('./app/pages/deposito/deposito.route') },
             { path: 'gestion-proveedor', loadChildren: () => import('./app/pages/proveedor/proveedor.route') },
+            { path: 'gestion-general', loadChildren: () => import('./app/pages/pedidos/pedidos.router') },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]

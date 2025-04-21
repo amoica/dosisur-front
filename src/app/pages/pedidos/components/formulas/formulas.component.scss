@@ -1,0 +1,137 @@
+/* === FIELDSET PARA app-formulas === */
+.fieldset-contenedor {
+  margin-top: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+::ng-deep .p-fieldset {
+  margin: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+::ng-deep .p-fieldset-legend {
+  font-weight: 700 !important;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  background: transparent !important;
+  border: none !important;
+  padding-left: 0.5rem;
+}
+
+/* === TABLA DE COMPONENTES === */
+.items-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+
+  thead {
+    th {
+      font-weight: 600;
+      color: var(--text-color-secondary);
+      border-bottom: 1px solid var(--surface-border);
+      text-align: left;
+      padding: 0.75rem 1rem;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 60%; }
+    th:nth-child(2), td:nth-child(2) { width: 20%; }
+    th:nth-child(3), td:nth-child(3) { width: 20%; min-width: 120px; }
+  }
+
+  tbody {
+    tr {
+      background: var(--surface-card);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      vertical-align: middle;
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 80px;
+      }
+    }
+  }
+}
+
+/* === ACCIONES === */
+.actions-cell {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+
+  button {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+  }
+}
+
+/* === BOTÓN "AGREGAR ÍTEM" === */
+.section-button-group {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .items-table,
+  .items-table thead,
+  .items-table tbody,
+  .items-table th,
+  .items-table td,
+  .items-table tr {
+    display: block;
+  }
+
+  .items-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .items-table tbody tr {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .items-table td {
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+  }
+
+  .items-table td:before {
+    position: absolute;
+    top: 0.75rem;
+    left: 1rem;
+    width: 45%;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+  }
+
+  .items-table td:nth-of-type(1):before { content: "Descripción"; }
+  .items-table td:nth-of-type(2):before { content: "Cantidad";    }
+  .items-table td:nth-of-type(3):before { content: "Acción";      }
+}

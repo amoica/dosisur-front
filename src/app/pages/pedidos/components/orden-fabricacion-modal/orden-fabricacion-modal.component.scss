@@ -1,0 +1,25 @@
+:host ::ng-deep .p-datepicker .p-inputtext {
+  width: 100% !important;
+}
+
+
+.datos-generales,
+.observaciones,
+.detalles-skid {
+  margin-bottom: 1.5rem;
+}
+
+.datos-generales h3,
+.observaciones h3,
+.detalles-skid h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.datos-generales p,
+.observaciones p,
+.detalles-skid p {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}

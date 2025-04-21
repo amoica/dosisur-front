@@ -1,0 +1,53 @@
+<p-dialog header="Crear Orden de Compra" [(visible)]="display" [modal]="true" [responsive]="true" [style]="{width: '50vw'}" (onHide)="close()">
+    <p-steps [model]="steps" [activeIndex]="activeIndex"></p-steps>
+    
+    <div class="wizard-content" style="margin-top: 1rem;">
+      <ng-container [ngSwitch]="activeIndex">
+        <!-- Paso 1: Información del Pedido -->
+        <div *ngSwitchCase="0">
+          <div class="p-fluid">
+            <div class="p-field">
+              <label for="proveedor">Proveedor</label>
+              <input id="proveedor" type="text" pInputText [(ngModel)]="ordenData.proveedor">
+            </div>
+            <div class="p-field">
+              <label for="producto">Producto</label>
+              <input id="producto" type="text" pInputText [(ngModel)]="ordenData.producto">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Paso 2: Detalle de Compra -->
+        <div *ngSwitchCase="1">
+          <div class="p-fluid">
+            <div class="p-field">
+              <label for="cantidad">Cantidad</label>
+              <input id="cantidad" type="number" pInputText [(ngModel)]="ordenData.cantidad">
+            </div>
+            <div class="p-field">
+              <label for="precio">Precio Unitario</label>
+              <input id="precio" type="number" pInputText [(ngModel)]="ordenData.precio">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Paso 3: Resumen -->
+        <div *ngSwitchCase="2">
+          <h3>Resumen de la Orden de Compra</h3>
+          <p><strong>Proveedor:</strong> {{ ordenData.proveedor }}</p>
+          <p><strong>Producto:</strong> {{ ordenData.producto }}</p>
+          <p><strong>Cantidad:</strong> {{ ordenData.cantidad }}</p>
+          <p><strong>Precio Unitario:</strong> {{ ordenData.precio }}</p>
+        </div>
+      </ng-container>
+    </div>
+    
+    <ng-template pTemplate="footer">
+      <div class="wizard-footer" style="display: flex; justify-content: space-between; margin-top: 1rem;">
+        <button pButton type="button" label="Anterior" icon="pi pi-chevron-left" (click)="prevStep()" [disabled]="activeIndex === 0"></button>
+        <button pButton type="button" label="Siguiente" icon="pi pi-chevron-right" iconPos="right" (click)="nextStep()" *ngIf="activeIndex < steps.length - 1"></button>
+        <button pButton type="button" label="Confirmar" (click)="confirm()" *ngIf="activeIndex === steps.length - 1"></button>
+        <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="cancel()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>

@@ -18,28 +18,24 @@
         <div class="p-col-12 p-md-4 order-md-1">
           <div class="form-group">
             <label for="recetaName">Nombre del Componente</label>
-            <input id="recetaName" type="text" pInputText [(ngModel)]="recetaForm.name"
-              placeholder="Ingrese el nombre" class="input-rounded" />
+            <input id="recetaName" type="text" pInputText [(ngModel)]="recetaForm.name" placeholder="Ingrese el nombre"
+              class="input-rounded" />
           </div>
         </div>
         <!-- Código -->
         <div class="p-col-12 p-md-4 order-md-2">
           <div class="form-group">
             <label for="recetaCode">Código</label>
-            <input id="recetaCode" type="text" pInputText [(ngModel)]="recetaForm.code"
-              placeholder="Ingrese el código" class="input-rounded" />
+            <input id="recetaCode" type="text" pInputText [(ngModel)]="recetaForm.code" placeholder="Ingrese el código"
+              class="input-rounded" />
           </div>
         </div>
         <!-- Tipo Componente -->
         <div class="p-col-12 p-md-4 order-md-3">
           <div class="form-group">
             <label for="recetaTipo">Tipo Componente</label>
-            <p-dropdown 
-              [options]="tipos" 
-              [(ngModel)]="recetaForm.tipo" 
-              placeholder="Seleccionar Tipo" 
-              (onChange)="onTipoChange($event)"
-              styleClass="input-rounded">
+            <p-dropdown [options]="tipos" [(ngModel)]="recetaForm.tipo" placeholder="Seleccionar Tipo"
+              (onChange)="onTipoChange($event)" styleClass="input-rounded">
             </p-dropdown>
           </div>
         </div>
@@ -292,17 +288,23 @@
 
 
 <!-- Modal para ingresar nuevo tipo -->
-<p-dialog 
-  header="Agregar Nuevo Tipo" 
-  [(visible)]="showNewTipoDialog" 
-  [modal]="true" 
-  [closable]="true"
-  (onHide)="onDialogHide()"
-  [style]="{width: '300px'}">
+<!-- Modal para ingresar nuevo tipo -->
+<p-dialog header="Agregar Nuevo Tipo" [(visible)]="showNewTipoDialog" [modal]="true" [closable]="true"
+  (onHide)="onDialogHide()" [style]="{width: '300px'}">
   <div class="p-fluid">
     <div class="p-field p-mb-3">
-      <label for="newTipo" class = "labelTipo">Tipo:</label>
-      <input id="newTipo" type="text" pInputText [(ngModel)]="newTipo" />
+      <label for="newTipo" class="labelTipo">Tipo: </label>
+      <!-- Se agrega (keyup) para detectar cambios y obtener sugerencias -->
+      <input id="newTipo" type="text" pInputText [(ngModel)]="newTipo" (keyup)="onTipoInputChange()" />
+    </div>
+    <!-- Bloque para mostrar sugerencias si existen -->
+    <div class="p-field" *ngIf="suggestions && suggestions.length">
+      <p>¿Quisiste decir?</p>
+      <ul>
+        <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)" style="cursor:pointer">
+          {{ suggestion }}
+        </li>
+      </ul>
     </div>
   </div>
   <ng-template pTemplate="footer">

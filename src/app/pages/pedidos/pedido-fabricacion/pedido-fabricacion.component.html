@@ -1,0 +1,209 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-card class="order-card shadow-sm my-6">
+  <!-- Encabezado -->
+  <div class="order-header">
+    <div class="header-left">
+      <img
+        src="https://media.licdn.com/dms/image/v2/D4D03AQFp-muMD-juEA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1720460116069?e=1750896000&v=beta&t=tcUzBxNlkGbobKOTj_voSZrxm2BOITDFuKd26t2yG-E"
+        alt="Logo" class="order-logo" />
+      <div>
+        <h1 class="order-title">Dosisur</h1>
+        <div class="order-address">
+          <p>Au-San Martin 123A</p>
+          <p>Cipolletti, Bio Magno</p>
+          <p>Argentina</p>
+        </div>
+      </div>
+    </div>
+    <div class="order-info">
+      <p><span>Orden #</span> {{ pedido.codigo }}</p>
+      <p><span>Emitida:</span> {{ pedido.fechaEmision | date:'dd/MM/yyyy' }}</p>
+      <p><span>Estado: </span> <span>{{ pedido.estado }}</span></p>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Información Principal -->
+  <div class="order-main">
+    <!-- Cliente -->
+    <div class="order-section">
+      <h3><i class="pi pi-user mr-2"></i> Cliente</h3>
+      <p><strong>Nombre:</strong> {{ pedido.pedidoCliente?.cliente?.nombre }}</p>
+      <p><strong>Contacto:</strong> {{ pedido.pedidoCliente?.contacto?.nombre }}</p>
+      <p><strong>Email / Tel:</strong> {{ pedido.pedidoCliente?.contacto?.email }} / {{
+        pedido.pedidoCliente?.contacto?.telefono }}</p>
+    </div>
+    <!-- Orden -->
+    <div class="order-section">
+      <h3><i class="pi pi-file-edit mr-2"></i> Detalles de la Orden</h3>
+      <p><strong>OC #:</strong> {{ pedido.pedidoCliente?.numero }}</p>
+      <p><strong>Entrega:</strong> {{ pedido.fechaEntrega | date:'dd/MM/yyyy' }}</p>
+      <p><strong>Presupuesto:</strong> {{ pedido.nroPresupuesto }}</p>
+      <p><strong>Yacimiento:</strong> {{ pedido.yacimiento }}</p>
+    </div>
+    <!-- Skid -->
+    <div class="order-section">
+      <h3><i class="pi pi-box mr-2"></i> Skid</h3>
+      <p><strong>Producto:</strong> {{ skid.nombre }} ({{ skid.lts }} lts)</p>
+      <p><strong>Tipo:</strong> {{ skid.tipo }}</p>
+      <p><strong>Cantidad:</strong> {{ pedido.cantidad }}</p>
+      <p><strong>Obs.:</strong> {{ pedido.observaciones }}</p>
+    </div>
+  </div>
+
+  <!-- Configuración del Skid -->
+  <div class="order-config">
+    <h3 class="config-title"><i class="pi pi-cog"></i> Configuración del Skid</h3>
+    <div class="config-grid">
+      <div class="config-column">
+        <h4>Energía</h4>
+        <ul>
+          <li><span>Paneles:</span> <span>{{ pedido.snapshotSkid?.potenciaPaneles || 'N/A' }}</span></li>
+          <li><span>Baterías:</span> <span>{{ pedido.snapshotSkid?.baterias || 'N/A' }}</span></li>
+        </ul>
+      </div>
+      <div class="config-column">
+        <h4>Componentes</h4>
+        <ul>
+          <li><span>Tanque:</span> <span>{{ pedido.snapshotSkid?.tanque ? 'Sí' : 'No' }}</span></li>
+          <li><span>Calibración:</span> <span>{{ pedido.snapshotSkid?.calibracion ? 'Sí' : 'No' }}</span></li>
+        </ul>
+      </div>
+      <div class="config-column">
+        <h4>Sistema</h4>
+        <ul>
+          <li><span>PSV:</span> <span>{{ pedido.snapshotSkid?.psv || 'N/A' }}</span></li>
+          <li><span>Bombas:</span> <span>{{ pedido.snapshotSkid?.bombas?.join(', ') || 'N/A' }}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Componentes del Skid -->
+    <div class="components-section mt-6">
+      <h3 class="config-title"><i class="pi pi-list"></i> Componentes del Skid</h3>
+      <!-- Mostrar FormulasComponent si la orden es editable -->
+      <ng-container *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'; else seccionesCapturadas">
+        <ng-container *ngIf="skid.secciones?.length">
+          <app-formulas *ngFor="let seccion of skid.secciones"
+            [idComponente]="seccion.baseComponenteId!"></app-formulas>
+        </ng-container>
+        <ng-container *ngIf="pedido.snapshotSkid?.tableros?.length">
+          <app-formulas *ngFor="let tablero of pedido.snapshotSkid.tableros" [idComponente]="tablero"></app-formulas>
+        </ng-container>
+        <ng-container *ngIf="pedido.snapshotSkid?.instrumentos?.length">
+          <app-formulas *ngFor="let instrumento of pedido.snapshotSkid.instrumentos"
+            [idComponente]="instrumento"></app-formulas>
+        </ng-container>
+      </ng-container>
+
+      <!-- Secciones capturadas desde snapshot -->
+      <ng-template #seccionesCapturadas>
+        <div *ngFor="let seccion of pedido.snapshotSkid?.seccionesExtras">
+          <p-fieldset [legend]="seccion.nombre" [toggleable]="true" class="fieldset-contenedor">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of seccion.items">
+                  <td>{{ getNombreArticulo(item.insumoId) }}</td>
+                  <td>{{ item.cantidad }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </p-fieldset>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Componentes adicionales para esta Orden -->
+  <form [formGroup]="snapshotForm" *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'">
+
+    <div class="components-section mt-6">
+      <h3 class="config-title">
+        <i class="pi pi-plus-circle mr-2"></i> Componentes adicionales para esta Orden
+      </h3>
+
+      <div formArrayName="seccionesExtras">
+        <div *ngFor="let seccion of seccionesExtras.controls; let i = index" [formGroupName]="i"
+          class="component-block">
+          <!-- Header del componente -->
+          <div class="component-header mb-4">
+            <input type="text" pInputText formControlName="nombre" placeholder="Nombre del componente"
+              class="text-xl font-semibold w-full" />
+          </div>
+
+          <!-- Tabla de ítems -->
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="items">
+              <tr *ngFor="let item of getItems(i).controls; let j = index" [formGroupName]="j">
+                <td>
+                  <p-dropdown formControlName="insumoId" [options]="articulos" optionLabel="name" optionValue="id"
+                    placeholder="Seleccione insumo" [filter]="true" filterPlaceholder="Buscar..."></p-dropdown>
+                </td>
+                <td>
+                  <input type="number" pInputText formControlName="cantidad" placeholder="Cantidad" min="1" />
+                </td>
+                <td class="actions-cell">
+                  <button pButton type="button" icon="pi pi-trash" severity="danger"
+                    (click)="removeItem(i, j)"></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Botones dentro de la sección -->
+          <div class="section-button-group">
+            <button pButton type="button" icon="pi pi-plus" label="Agregar Ítem" (click)="addItem(i)"></button>
+            <button pButton type="button" icon="pi pi-trash" label="Eliminar Sección" severity="danger"
+              (click)="removeSeccion(i)" class="ml-2"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para agregar nuevo componente -->
+      <div class="text-left mt-3">
+        <button pButton type="button" icon="pi pi-plus-circle" label="Agregar nuevo Componente" class="p-button-primary"
+          (click)="addSeccion('personalizada')"></button>
+      </div>
+    </div>
+
+    <div *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'" class="mt-6 text-right">
+      <p-dropdown formControlName="estadoDestino" [options]="estadoOpciones" placeholder="Seleccionar nuevo estado"
+        class="mr-3" optionLabel="label" optionValue="value"></p-dropdown>
+      <button pButton label="Confirmar Cambios" icon="pi pi-check" class="p-button-success"
+        (click)="confirmarCambios()"></button>
+    </div>
+
+   
+  </form>
+
+   <!-- Botón para Procesar Orden -->
+   <div *ngIf="pedido.estado === 'APROBADA'" class="mt-4 text-right">
+    <button pButton label="Procesar Orden" icon="pi pi-play" class="p-button-warning" (click)="darCurso()"></button>
+  </div>
+
+  <!-- Botón para Finalizar Orden y Subir Remito -->
+  <div *ngIf="pedido.estado === 'EN_PROCESO'" class="mt-4 text-right">
+    <p-fileUpload name="remito" url="URL_DEL_BACKEND_PARA_SUBIR_REMITO" accept=".pdf,.jpg,.png" maxFileSize="1000000"
+      auto chooseLabel="Subir Remito" (onUpload)="finalizarOrden($event)">
+    </p-fileUpload>
+  </div>
+
+
+
+</p-card>

@@ -1,0 +1,119 @@
+<div class="card">
+    <div class="pedidos-container">
+        <div class="p-grid mb-4">
+            <!-- Título y descripción -->
+            <div class="p-col-12">
+              <h1 class="page-title">Gestión de Pedidos</h1>
+              <p class="page-description">
+                Administra y gestiona fácilmente los pedidos. Puedes crear, editar o eliminar insumos y verificar su estado.
+              </p>
+            </div>
+        </div>
+
+        <p-toolbar styleClass="mb-6">
+            <ng-template #start>
+                <p-button label="Nueva OF" icon="pi pi-plus" class="mr-2" (click)="showOrdenFabricacion()"></p-button>
+                <p-button label="Nueva OT" severity="contrast" icon="pi pi-plus" class="mr-2"
+                    (click)="showOrdenFabricacion()"></p-button>
+            </ng-template>
+
+            <ng-template #end>
+                <label>Rango de fechas: </label>
+                <!-- Usamos p-datepicker según la última versión de PrimeNG -->
+                <p-datepicker [(ngModel)]="filtroFechaDesde" dateFormat="dd/mm/yy" selectionMode="range"
+                    [readonlyInput]="true" [iconDisplay]="'input'" [showIcon]="true"
+                    inputId="icondisplay"></p-datepicker>
+            </ng-template>
+        </p-toolbar>
+
+
+
+        <!-- Título y descripción de la tabla -->
+        <div class="table-section">
+            <!-- Tabla con paginación y diseño moderno -->
+            <p-table #dt [value]="pedidos" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]"
+                responsiveLayout="scroll" styleClass="modern-table">
+
+                <ng-template #caption>
+                    <div class="flex items-center justify-between">
+                        <h5 class="m-0"> Pedidos Recientes</h5>
+                        <p-iconfield>
+                            <input pInputText type="text"
+                                (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar"
+                                class="w-full" />
+                        </p-iconfield>
+                    </div>
+
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Skid</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Prioridad</th>
+                        <th>Fecha de Entrega</th>
+                        <th>Acción</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-pedido>
+                    <tr>
+                        <td>{{ pedido.codigo }}</td>
+                        <td>{{ pedido.pedidoCliente.cliente.nombre }}</td>
+                        <td>{{ pedido.productoFabricado.nombre }}, {{pedido.productoFabricado.lts}} lts</td>
+                        <td>{{ pedido.productoFabricado.tipo }}</td>
+                        <td>
+                            <span
+                              [ngClass]="{
+                                'estado-creada': pedido.estado === 'CREADA',
+                                'estado-pendiente': pedido.estado === 'PENDIENTE',
+                                'estado-enproceso': pedido.estado === 'EN_PROCESO',
+                                'estado-finalizada': pedido.estado === 'FINALIZADA',
+                                'estado-cancelada': pedido.estado === 'CANCELADA'
+                              }"
+                            >
+                              {{ pedido.estado }}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              [ngClass]="{
+                                'prioridad-baja': pedido.prioridad === 'BAJA',
+                                'prioridad-media': pedido.prioridad === 'MEDIA',
+                                'prioridad-alta': pedido.prioridad === 'ALTA'
+                              }"
+                            >
+                              {{ pedido.prioridad }}
+                            </span>
+                          </td>
+                        <td>{{ pedido.fechaEntrega | date:'dd/MM/yyyy' }}</td>
+                        
+                        <td>
+                            <!-- Botones para acciones sobre el pedido -->
+                            <button pButton type="button" icon="pi pi-trash" title="Dar de baja"
+                                (click)="darDeBajaPedido(pedido.id)" class="action-icon delete-btn"></button>
+                            <button pButton type="button" icon="pi pi-eye" title="Visualizar"
+                                (click)="verPedido(pedido.id)" class="action-icon view-btn"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="6">No se encontraron pedidos.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Inclusión de modales (componentes independientes) -->
+        <app-orden-fabricacion-modal *ngIf="displayOrdenFabricacion"
+        (closeModal)="onModalClose($event)"></app-orden-fabricacion-modal>
+        <app-orden-trabajo-modal *ngIf="displayOrdenTrabajo"
+            (closeModal)="displayOrdenTrabajo = false"></app-orden-trabajo-modal>
+    </div>
+
+</div>
