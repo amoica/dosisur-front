@@ -4,13 +4,15 @@ import { Articulo, ArticuloServiceService } from '../../../service/articulo-serv
 import { CommonModule, Location } from '@angular/common';
 import { TabViewModule } from 'primeng/tabview';
 import { TableModule } from 'primeng/table';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-articulo-details',
   imports: [
     CommonModule,
     TabViewModule,
-    TableModule
+    TableModule,
+    CardModule
   ],
   templateUrl: './articulo-details.component.html',
   styleUrls: ['./articulo-details.component.scss']
@@ -32,8 +34,8 @@ export class ArticuloDetailsComponent implements OnInit {
   loadArticulo(id: number): void {
     this.articuloService.getArticuloById(id).subscribe({
       next: (data: any) => {
-        console.log('Detalle del artículo:', data);
         this.articulo = data;
+        console.log(this.articulo);
       },
       error: (err) => {
         console.error('Error al cargar el artículo:', err);

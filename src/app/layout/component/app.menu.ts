@@ -29,8 +29,7 @@ export class AppMenu {
                 items: [
                    
                     { label: 'Stock', icon: 'pi pi-fw pi-objects-column', routerLink: ['/gestion-articulos/stock'] },
-                    { label: 'Pedidos', icon: 'pi pi-fw pi-clipboard', routerLink: ['/gestion-general/pedidos'] },
-                    { label: 'Pedidos', icon: 'pi pi-fw pi-clipboard', routerLink: ['/gestion-articulos/movimientos'] },
+                    { label: 'Pedidos', icon: 'pi pi-fw pi-clipboard', routerLink: ['/gestion-general/pedidos'] }
                 ]
             },
             {

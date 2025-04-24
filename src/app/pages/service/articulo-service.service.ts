@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 export interface Articulo {
@@ -8,9 +8,13 @@ export interface Articulo {
   description: string;
   minimunStock: number;
   available: boolean;
-  unidad:string,
+  unidad: string,
   isInventoriable?: boolean;
-  imagenUrl?:string;
+  imagenUrl?: string;
+  sinonimo?: string;
+  updateAt?: Date;
+  createdAt?: Date;
+  categoria?:string | null;
   // … otros campos si los necesitas
   insumoProveedor?: Array<{
     proveedorId: number;
@@ -31,8 +35,20 @@ export class ArticuloServiceService {
 
   constructor(private http: HttpClient) { }
 
-  getArticulos() {
-    return this.http.get(this.apiUrl);
+  getArticulos(page?: number, limit?: number, search?: string) {
+    if (page && limit) {
+      let params = new HttpParams()
+        .set('page', page)
+        .set('limit', limit);
+
+      if (search) {
+        params = params.set('search', search);
+      }
+      return this.http.get(this.apiUrl, { params });
+    } else {
+      return this.http.get(this.apiUrl);
+
+    }
   }
 
   getArticuloById(id: number) {
@@ -53,7 +69,7 @@ export class ArticuloServiceService {
     return this.http.delete(this.apiUrl + '/' + id);
   }
 
-  toggleDisponibilidad(){
+  toggleDisponibilidad() {
     //
   }
 }

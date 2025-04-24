@@ -11,7 +11,7 @@
    General Styles - Títulos, Descripciones y Contenedores Principales
 ====================================================================== */
 .page-title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
   color: var(--primary-color);
@@ -99,13 +99,35 @@
   gap: 0.5rem;
 }
 
-.search-input {
-  flex: 1;
-  width: auto;
-}
+
 
 .new-client-button, .new-articulo-button {
   margin-left: 1rem;
+}
+
+:host {
+  .search-input {
+    border: 1px solid var(--surface-border);
+    border-radius:  0.5rem;       /* más redondo */
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .search-input:hover {
+    border-color: var(--primary-color);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(59, 132, 246, 0.25);
+    border-radius:  0.5rem;        /* mantenemos el radio al hacer focus */
+  }
+
+  /* También redondeamos el botón de búsqueda */
+  .search-button .p-button {
+    border-radius: var(--border-radius);
+  }
 }
 
 /* ======================================================================
@@ -288,10 +310,7 @@ textarea.p-inputtextarea:focus {
 /* ======================================================================
    Botones - Estilos personalizados para botones redondeados
 ====================================================================== */
-.p-button-secondary {
-  background-color: var(--text-secondary-color);
-  border: none;
-}
+
 
 .p-button-rounded {
   margin-right: 2px;

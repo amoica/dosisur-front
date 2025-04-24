@@ -1,17 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { AuthService } from '../service/auth.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, ToastModule],
+    providers: [MessageService],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
@@ -36,8 +40,8 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                     />
                                 </g>
                             </svg>
-                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
-                            <span class="text-muted-color font-medium">Sign in to continue</span>
+                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Bienvenidos</div>
+                            <span class="text-muted-color font-medium">Inicia sesión para continuar</span>
                         </div>
 
                         <div>
@@ -50,11 +54,11 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                             <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                                 <div class="flex items-center">
                                     <p-checkbox [(ngModel)]="checked" id="rememberme1" binary class="mr-2"></p-checkbox>
-                                    <label for="rememberme1">Remember me</label>
+                                    <label for="rememberme1">Recordar credenciales</label>
                                 </div>
-                                <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
+                                <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Olvido su contraseña?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" routerLink="/"></p-button>
+                            <p-button label="Ingresar" styleClass="w-full" (onClick)="login()"></p-button>
                         </div>
                     </div>
                 </div>
@@ -62,10 +66,63 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
         </div>
     `
 })
-export class Login {
+export class Login implements OnInit {
     email: string = '';
 
     password: string = '';
 
     checked: boolean = false;
+
+    constructor(
+        private authService: AuthService,
+        private messageService: MessageService,
+        private router: Router) {
+
+    }
+
+    ngOnInit(): void {
+
+    }
+
+    login() {
+        if (!this.email || !this.password || !this.validateEmail(this.email)) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Datos inválidos',
+                detail: 'Por favor ingrese un correo y contraseña válidos',
+            });
+            return;
+        }
+
+        const credentials = {
+            email: this.email,
+            password: this.password,
+        };
+
+        this.authService.login(credentials).subscribe({
+            next: (resp) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Bienvenido',
+                    detail: 'Inicio de sesión exitoso',
+                });
+                this.router.navigate(['/']);
+            },
+            error: (err) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error de autenticación',
+                    detail: 'Email o contraseña incorrectos',
+                });
+            },
+        });
+    }
+
+
+    private validateEmail(email: string): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+
 }

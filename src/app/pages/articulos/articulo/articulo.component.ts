@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ArticuloServiceService } from '../../service/articulo-service.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TableModule } from 'primeng/table';
+import { TableModule , TableLazyLoadEvent} from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
@@ -20,6 +20,8 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { InputIconModule } from 'primeng/inputicon';
 import { Select } from 'primeng/select';
 import { FileUpload } from 'primeng/fileupload';
+import { LazyLoadEvent } from 'primeng/api';
+
 
 interface InsumoProveedor {
   proveedorId: number;
@@ -77,6 +79,9 @@ export class ArticuloComponent implements OnInit {
   insumoProveedorDialog: boolean = false;
   insumoProveedor: InsumoProveedor = { proveedorId: 0, codigoProveedor: '' };
   imagenFile: File | null = null;
+  rows = 10;
+  totalRecords = 0;
+  searchValue = '';
 
   unitsOptions = [
     { label: 'Metros (m)', value: 'm' },
@@ -115,9 +120,37 @@ export class ArticuloComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.fetchArticulos();
     this.initForm();
     this.loadProveedoresList();
+    this.loadArticulosLazy({ first: 0, rows: this.rows, globalFilter: '' });
+  }
+
+  loadArticulosLazy(event: TableLazyLoadEvent) {
+    this.loading = true;
+
+    // Si rows viene null, usaremos el tamaño por defecto
+    const limit = event.rows ?? this.rows;
+    // idem para first (índice del primer registro)
+    const first = event.first ?? 0;
+    const page = Math.floor(first / limit) + 1;
+    const search = (event.globalFilter as string) || '';
+
+    this.articuloService.getArticulos(page, limit, search)
+      .subscribe({
+        next: (resp:any) => {
+          this.articulos     = resp.data;
+          this.totalRecords  = resp.meta.total;
+          this.loading       = false;
+        },
+        error: err => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error al cargar artículos',
+            detail: err.message || 'Revise su conexión',
+          });
+        }
+      });
   }
 
   initForm() {
