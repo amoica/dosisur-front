@@ -45,7 +45,7 @@ export class RecetaService {
   }
 
   // Crea una nueva receta
-  createReceta(receta: Receta): Observable<Receta> {
+  createReceta(receta: Receta | FormData): Observable<Receta> {
 
     console.log(receta);
     return this.http.post<Receta>(this.apiUrl, receta);

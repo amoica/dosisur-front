@@ -54,6 +54,8 @@ export class RecetaComponent implements OnInit {
   selectedArticulos: any[] = [];
   recetas: any[] = [];
   selectedImage: string | null = null;
+  selectedFile: File | null = null;
+
 
   // Variables de edición
   displayEditDialog = false;
@@ -84,7 +86,7 @@ export class RecetaComponent implements OnInit {
   }
 
   fetchArticulos(): void {
-    this.articuloService.getArticulos().subscribe({
+    this.articuloService.getAllArticuleNotFilters().subscribe({
       next: (data: any) => {
         this.availableArticulos = data.data?.map((art: any) => ({
           ...art,
@@ -217,18 +219,20 @@ export class RecetaComponent implements OnInit {
       });
       return;
     }
-
-    const newComponente = {
-      nombre: this.recetaForm.name,
-      codigo: this.recetaForm.code,
-      tipo: this.recetaForm.tipo || undefined,
-      componentes: this.selectedArticulos.map(item => ({
-        insumoId: item.id,
-        cantidad: item.quantity,
-      })),
-    };
-
-    this.recetaService.createReceta(newComponente).subscribe({
+  
+    const formData = new FormData();
+    formData.append('nombre', this.recetaForm.name);
+    formData.append('codigo', this.recetaForm.code);
+    if (this.recetaForm.tipo) formData.append('tipo', this.recetaForm.tipo);
+    if (this.selectedFile) formData.append('imagen', this.selectedFile); // Aquí se sube la imagen
+  
+    const componentes = this.selectedArticulos.map(item => ({
+      insumoId: item.id,
+      cantidad: item.quantity,
+    }));
+    formData.append('componentes', JSON.stringify(componentes));
+  
+    this.recetaService.createReceta(formData).subscribe({
       next: (response: any) => {
         this.recetas.push(response.data || response);
         this.messageService.add({
@@ -266,9 +270,10 @@ export class RecetaComponent implements OnInit {
   onFileSelected(event: any): void {
     const file: File = event.files[0];
     if (file) {
+      this.selectedFile = file; // Guardamos el archivo real
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.selectedImage = e.target.result;
+        this.selectedImage = e.target.result; // Solo para previsualizar
       };
       reader.readAsDataURL(file);
     }

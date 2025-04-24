@@ -51,6 +51,10 @@ export class ArticuloServiceService {
     }
   }
 
+  getAllArticuleNotFilters(){
+    return this.http.get(`${this.apiUrl}/notfilters`);
+  }
+
   getArticuloById(id: number) {
     return this.http.get(this.apiUrl + '/' + id);
   }

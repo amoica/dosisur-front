@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, tap } from 'rxjs';
 
 interface LoginResponse{
@@ -20,7 +21,7 @@ export class AuthService {
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
 
 
@@ -35,6 +36,16 @@ export class AuthService {
       })
     )
   
+  }
+
+  logout() {
+    // Limpia token y datos de sesión
+    localStorage.removeItem('token'); // o el nombre que uses
+    localStorage.removeItem('user');  // si guardás info del usuario
+    sessionStorage.clear();           // opcional, por si usás sessionStorage
+
+    // Redirige al login
+    this.router.navigate(['/auth/login']);
   }
 
 

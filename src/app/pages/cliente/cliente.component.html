@@ -1,357 +1,267 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
+<p-card>
+    <div class="p-grid">
+        <!-- Título y descripción -->
+        <div class="p-col-12">
+            <h1 class="page-title">Gestión de Clientes</h1>
+            <p class="page-description">
+                Administra y gestiona fácilmente la información de tus clientes.
+                Realiza búsquedas, crea nuevos clientes o edita los existentes.
+            </p>
+        </div>
 
-<div class="p-grid">
-  <!-- Título y descripción -->
-  <div class="p-col-12">
-      <h1 class="page-title">Gestión de Clientes</h1>
-      <p class="page-description">
-          Administra y gestiona fácilmente la información de tus clientes.  
-          Realiza búsquedas, crea nuevos clientes o edita los existentes.
-      </p>
-  </div>
+        <!-- Barra de herramientas -->
+        <div class="p-col-12 toolbar">
+            <div class="search-wrapper">
+                <input #searchInput type="text" pInputText placeholder="Buscar artículos" class="search-input"
+                  (input)="dt.filterGlobal(searchInput.value, 'contains')" />
+                <button pButton type="button" icon="pi pi-search" class="p-button-outlined search-button"></button>
+              </div>
+            <button pButton label="Nuevo" icon="pi pi-plus"
+                class= "p-button-primary new-client-button" (click)="openNew()">
+            </button>
+        </div>
+    </div>
 
-  <!-- Barra de herramientas -->
-  <div class="p-col-12 toolbar">
-      <div class="search-wrapper">
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Buscar clientes"
-            class="search-input" 
-          />
-          <button pButton type="button" icon="pi pi-search" class="p-button-outlined search-button"></button>
-      </div>
-      <button pButton 
-        label="Nuevo Cliente" 
-        icon="pi pi-plus"
-        class="p-button-outlined p-button-success new-client-button" 
-        (click)="openNew()">
-      </button>
-  </div>
-</div>
+    <!-- Tabla de clientes -->
+    <p-table #dt [value]="clientes" [paginator]="true" [rows]="15"
+        [globalFilterFields]="['nombre', 'email', 'telefono', 'direccion']" [sortMode]="'multiple'"
+        [responsiveLayout]="'scroll'" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} clientes">
 
-<!-- Tabla de clientes -->
-<p-table 
-  [value]="clientes" 
-  [paginator]="true" 
-  [rows]="15"
-  [globalFilterFields]="['nombre', 'email', 'telefono', 'direccion']" 
-  [sortMode]="'multiple'"
-  [responsiveLayout]="'scroll'" 
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} clientes">
-  
-  <ng-template pTemplate="header">
-      <tr>
-          <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre"></p-sortIcon></th>
-          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-          <th pSortableColumn="telefono">Teléfono <p-sortIcon field="telefono"></p-sortIcon></th>
-          <th pSortableColumn="direccion">Dirección <p-sortIcon field="direccion"></p-sortIcon></th>
-          <th>Acciones</th>
-      </tr>
-  </ng-template>
-  
-  <ng-template pTemplate="body" let-cliente>
-      <tr>
-          <td>{{ cliente.nombre }}</td>
-          <td>{{ cliente.email }}</td>
-          <td>{{ cliente.telefono }}</td>
-          <td>{{ cliente.direccion }}</td>
-          <td>
-              <button 
-                pButton 
-                icon="pi pi-eye" 
-                class="p-button-text" 
-                (click)="goToDetail(cliente.id)"
-              ></button>
-              <button 
-                pButton 
-                icon="pi pi-pencil" 
-                class="p-button-text" 
-                (click)="editCliente(cliente)"
-              ></button>
-              <button 
-                pButton 
-                icon="pi pi-trash" 
-                class="p-button-text" 
-                (click)="deleteCliente(cliente)"
-              ></button>
-          </td>
-      </tr>
-  </ng-template>
-</p-table>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre"></p-sortIcon></th>
+                <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                <th pSortableColumn="telefono">Teléfono <p-sortIcon field="telefono"></p-sortIcon></th>
+                <th pSortableColumn="direccion">Dirección <p-sortIcon field="direccion"></p-sortIcon></th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-cliente>
+            <tr>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.direccion }}</td>
+                <td>
+                    <button pButton icon="pi pi-eye" icon="pi pi-eye" class="p-button-info mr-1 mb-1" (click)="goToDetail(cliente.id)"></button>
+                    <button pButton icon="pi pi-pencil" class="p-button-warning mr-1 mb-1" (click)="editCliente(cliente)"></button>
+                    <button pButton icon="pi pi-trash" class="p-button-danger" (click)="deleteCliente(cliente)"></button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+</p-card>
 
 
 <!-- Formulario Modal (crear/editar Cliente) -->
-<p-dialog 
-  [(visible)]="clienteDialog" 
-  [modal]="true" 
-  [closable]="false"
-  header="{{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}" 
-  [responsive]="true" 
-  [style]="{ width: '60vw' }"
->
-  <div class="modal-section">
-      <div class="decorative-section">
-          <i class="pi pi-id-card"></i>
-          <h2>{{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
-      </div>
+<p-dialog [(visible)]="clienteDialog" [modal]="true" [closable]="false"
+    header="{{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}" [responsive]="true" [style]="{ width: '60vw' }">
+    <div class="modal-section">
+        <div class="decorative-section">
+            <i class="pi pi-id-card"></i>
+            <h2>{{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
+        </div>
 
-      <hr />
+        <hr />
 
-      <!-- Datos principales del Cliente -->
-      <div class="form-grid">
-          <!-- Nombre -->
-          <div class="p-field">
-              <label for="nombre">Nombre <span class="required">*</span></label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-user"></i>
-                  <input id="nombre" type="text" pInputText [(ngModel)]="cliente.nombre"
-                      placeholder="Nombre completo o razón social" required />
-              </div>
-              <small *ngIf="submitted && !cliente.nombre" class="p-error">El nombre es obligatorio.</small>
-          </div>
+        <!-- Datos principales del Cliente -->
+        <div class="form-grid">
+            <!-- Nombre -->
+            <div class="p-field">
+                <label for="nombre">Nombre <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-user"></i>
+                    <input id="nombre" type="text" pInputText [(ngModel)]="cliente.nombre"
+                        placeholder="Nombre completo o razón social" required />
+                </div>
+                <small *ngIf="submitted && !cliente.nombre" class="p-error">El nombre es obligatorio.</small>
+            </div>
 
-          <!-- Email -->
-          <div class="p-field">
-              <label for="email">Email <span class="required">*</span></label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-envelope"></i>
-                  <input id="email" type="email" pInputText [(ngModel)]="cliente.email"
-                      placeholder="Correo electrónico" required />
-              </div>
-              <small *ngIf="submitted && !cliente.email" class="p-error">El email es obligatorio.</small>
-          </div>
+            <!-- Email -->
+            <div class="p-field">
+                <label for="email">Email <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-envelope"></i>
+                    <input id="email" type="email" pInputText [(ngModel)]="cliente.email"
+                        placeholder="Correo electrónico" required />
+                </div>
+                <small *ngIf="submitted && !cliente.email" class="p-error">El email es obligatorio.</small>
+            </div>
 
-          <!-- Teléfono -->
-          <div class="p-field">
-              <label for="telefono">Teléfono <span class="required">*</span></label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-phone"></i>
-                  <input id="telefono" type="text" pInputText [(ngModel)]="cliente.telefono"
-                      placeholder="Teléfono principal" required />
-              </div>
-              <small *ngIf="submitted && !cliente.telefono" class="p-error">El teléfono es obligatorio.</small>
-          </div>
+            <!-- Teléfono -->
+            <div class="p-field">
+                <label for="telefono">Teléfono <span class="required">*</span></label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-phone"></i>
+                    <input id="telefono" type="text" pInputText [(ngModel)]="cliente.telefono"
+                        placeholder="Teléfono principal" required />
+                </div>
+                <small *ngIf="submitted && !cliente.telefono" class="p-error">El teléfono es obligatorio.</small>
+            </div>
 
-          <!-- Celular -->
-          <div class="p-field">
-              <label for="celular">Celular</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-mobile"></i>
-                  <input id="celular" type="text" pInputText [(ngModel)]="cliente.celular"
-                      placeholder="Número de celular" />
-              </div>
-          </div>
+            <!-- Celular -->
+            <div class="p-field">
+                <label for="celular">Celular</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-mobile"></i>
+                    <input id="celular" type="text" pInputText [(ngModel)]="cliente.celular"
+                        placeholder="Número de celular" />
+                </div>
+            </div>
 
-          <!-- Dirección -->
-          <div class="p-field">
-              <label for="direccion">Dirección</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-map-marker"></i>
-                  <input id="direccion" type="text" pInputText [(ngModel)]="cliente.direccion"
-                      placeholder="Dirección completa" />
-              </div>
-          </div>
+            <!-- Dirección -->
+            <div class="p-field">
+                <label for="direccion">Dirección</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-map-marker"></i>
+                    <input id="direccion" type="text" pInputText [(ngModel)]="cliente.direccion"
+                        placeholder="Dirección completa" />
+                </div>
+            </div>
 
-          <!-- Ciudad -->
-          <div class="p-field">
-              <label for="ciudad">Ciudad</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-building"></i>
-                  <input id="ciudad" type="text" pInputText [(ngModel)]="cliente.ciudad" placeholder="Ciudad" />
-              </div>
-          </div>
+            <!-- Ciudad -->
+            <div class="p-field">
+                <label for="ciudad">Ciudad</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-building"></i>
+                    <input id="ciudad" type="text" pInputText [(ngModel)]="cliente.ciudad" placeholder="Ciudad" />
+                </div>
+            </div>
 
-          <!-- Provincia -->
-          <div class="p-field">
-              <label for="provincia">Provincia</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-globe"></i>
-                  <input id="provincia" type="text" pInputText [(ngModel)]="cliente.provincia"
-                      placeholder="Provincia" />
-              </div>
-          </div>
+            <!-- Provincia -->
+            <div class="p-field">
+                <label for="provincia">Provincia</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-globe"></i>
+                    <input id="provincia" type="text" pInputText [(ngModel)]="cliente.provincia"
+                        placeholder="Provincia" />
+                </div>
+            </div>
 
-          <!-- Código Postal -->
-          <div class="p-field">
-              <label for="codigoPostal">Código Postal</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-tag"></i>
-                  <input id="codigoPostal" type="text" pInputText [(ngModel)]="cliente.codigoPostal"
-                      placeholder="Código Postal" />
-              </div>
-          </div>
+            <!-- Código Postal -->
+            <div class="p-field">
+                <label for="codigoPostal">Código Postal</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-tag"></i>
+                    <input id="codigoPostal" type="text" pInputText [(ngModel)]="cliente.codigoPostal"
+                        placeholder="Código Postal" />
+                </div>
+            </div>
 
-          <!-- CUIT -->
-          <div class="p-field">
-              <label for="cuit">CUIT/DNI</label>
-              <div class="p-input-icon-left">
-                  <i class="pi pi-id-card"></i>
-                  <input id="cuit" type="text" pInputText [(ngModel)]="cliente.cuit" placeholder="CUIT o DNI" />
-              </div>
-          </div>
+            <!-- CUIT -->
+            <div class="p-field">
+                <label for="cuit">CUIT/DNI</label>
+                <div class="p-input-icon-left">
+                    <i class="pi pi-id-card"></i>
+                    <input id="cuit" type="text" pInputText [(ngModel)]="cliente.cuit" placeholder="CUIT o DNI" />
+                </div>
+            </div>
 
-          <!-- Observaciones -->
-          <div class="p-field p-field-observaciones">
-              <label for="observaciones">Observaciones</label>
-              <textarea id="observaciones" rows="3" pInputTextarea [(ngModel)]="cliente.observaciones"
-                  placeholder="Notas internas u observaciones"></textarea>
-          </div>
-      </div>
+            <!-- Observaciones -->
+            <div class="p-field p-field-observaciones">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" rows="3" pInputTextarea [(ngModel)]="cliente.observaciones"
+                    placeholder="Notas internas u observaciones"></textarea>
+            </div>
+        </div>
 
-      <!-- Sección para administrar Contactos (local, en el array) -->
-      <h3 style="margin-top:1.5rem;">Contactos</h3>
-      <p-table 
-        [value]="cliente.contactos || []"
-        [responsiveLayout]="'scroll'"
-        styleClass="p-datatable-sm"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Cargo</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-cont>
-          <tr>
-            <td>{{ cont.nombre }}</td>
-            <td>{{ cont.email }}</td>
-            <td>{{ cont.telefono }}</td>
-            <td>{{ cont.cargo }}</td>
-            <td>
-              <button 
-                pButton 
-                icon="pi pi-pencil" 
-                class="p-button-text p-button-rounded"
-                (click)="editContacto(cont)">
-              </button>
-              <button 
-                pButton 
-                icon="pi pi-trash" 
-                class="p-button-text p-button-rounded p-button-danger"
-                (click)="deleteContacto(cont)">
-              </button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-      <button
-        pButton
-        label="Agregar Contacto"
-        icon="pi pi-plus"
-        class="p-button-sm p-button-secondary"
-        style="margin-top:0.5rem;"
-        (click)="openNewContacto()"
-      ></button>
+        <!-- Sección para administrar Contactos (local, en el array) -->
+        <h3 style="margin-top:1.5rem;">Contactos</h3>
+        <p-table [value]="cliente.contactos || []" [responsiveLayout]="'scroll'" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Cargo</th>
+                    <th>Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-cont>
+                <tr>
+                    <td>{{ cont.nombre }}</td>
+                    <td>{{ cont.email }}</td>
+                    <td>{{ cont.telefono }}</td>
+                    <td>{{ cont.cargo }}</td>
+                    <td>
+                        <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded"
+                            (click)="editContacto(cont)">
+                        </button>
+                        <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger"
+                            (click)="deleteContacto(cont)">
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <button pButton label="Agregar Contacto" icon="pi pi-plus" class="p-button-sm p-button-secondary"
+            style="margin-top:0.5rem;" (click)="openNewContacto()"></button>
 
-  </div>
+    </div>
 
-  <footer class="modal-footer">
-      <button pButton label="Cancelar" icon="pi pi-times" class="p-button-secondary" (click)="hideDialog()"></button>
-      <button pButton label="Guardar" icon="pi pi-check" class="p-button-success" (click)="saveCliente()"
-          [disabled]="!cliente.nombre || !cliente.email || !cliente.telefono"></button>
-  </footer>
+    <footer class="modal-footer">
+        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-secondary" (click)="hideDialog()"></button>
+        <button pButton label="Guardar" icon="pi pi-check" class="p-button-success" (click)="saveCliente()"
+            [disabled]="!cliente.nombre || !cliente.email || !cliente.telefono"></button>
+    </footer>
 </p-dialog>
 
 <!-- Modal para agregar/editar un contacto -->
-<p-dialog
-  [(visible)]="contactoDialog"
-  [modal]="true"
-  [closable]="true"
-  header="{{ isEditContacto ? 'Editar Contacto' : 'Nuevo Contacto' }}"
-  [responsive]="true"
-  [style]="{ width: '40vw' }"
->
-  <div class="form-grid">
-      <div class="p-field">
-          <label for="contactoNombre">Nombre <span class="required">*</span></label>
-          <div class="p-input-icon-left">
-              <i class="pi pi-user"></i>
-              <input
-                  id="contactoNombre"
-                  type="text"
-                  pInputText
-                  [(ngModel)]="contacto.nombre"
-                  placeholder="Nombre del contacto"
-                  required
-              />
-          </div>
-      </div>
+<p-dialog [(visible)]="contactoDialog" [modal]="true" [closable]="true"
+    header="{{ isEditContacto ? 'Editar Contacto' : 'Nuevo Contacto' }}" [responsive]="true"
+    [style]="{ width: '40vw' }">
+    <div class="form-grid">
+        <div class="p-field">
+            <label for="contactoNombre">Nombre <span class="required">*</span></label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-user"></i>
+                <input id="contactoNombre" type="text" pInputText [(ngModel)]="contacto.nombre"
+                    placeholder="Nombre del contacto" required />
+            </div>
+        </div>
 
-      <div class="p-field">
-          <label for="contactoEmail">Email</label>
-          <div class="p-input-icon-left">
-              <i class="pi pi-envelope"></i>
-              <input
-                  id="contactoEmail"
-                  type="email"
-                  pInputText
-                  [(ngModel)]="contacto.email"
-                  placeholder="Correo electrónico"
-              />
-          </div>
-      </div>
+        <div class="p-field">
+            <label for="contactoEmail">Email</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-envelope"></i>
+                <input id="contactoEmail" type="email" pInputText [(ngModel)]="contacto.email"
+                    placeholder="Correo electrónico" />
+            </div>
+        </div>
 
-      <div class="p-field">
-          <label for="contactoTelefono">Teléfono</label>
-          <div class="p-input-icon-left">
-              <i class="pi pi-phone"></i>
-              <input
-                  id="contactoTelefono"
-                  type="text"
-                  pInputText
-                  [(ngModel)]="contacto.telefono"
-                  placeholder="Teléfono"
-              />
-          </div>
-      </div>
+        <div class="p-field">
+            <label for="contactoTelefono">Teléfono</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-phone"></i>
+                <input id="contactoTelefono" type="text" pInputText [(ngModel)]="contacto.telefono"
+                    placeholder="Teléfono" />
+            </div>
+        </div>
 
-      <div class="p-field">
-          <label for="contactoCargo">Cargo</label>
-          <div class="p-input-icon-left">
-              <i class="pi pi-briefcase"></i>
-              <input
-                  id="contactoCargo"
-                  type="text"
-                  pInputText
-                  [(ngModel)]="contacto.cargo"
-                  placeholder="Cargo o posición"
-              />
-          </div>
-      </div>
+        <div class="p-field">
+            <label for="contactoCargo">Cargo</label>
+            <div class="p-input-icon-left">
+                <i class="pi pi-briefcase"></i>
+                <input id="contactoCargo" type="text" pInputText [(ngModel)]="contacto.cargo"
+                    placeholder="Cargo o posición" />
+            </div>
+        </div>
 
-      <div class="p-field">
-          <label for="contactoObservaciones">Observaciones</label>
-          <textarea
-              id="contactoObservaciones"
-              rows="2"
-              pInputTextarea
-              [(ngModel)]="contacto.observaciones"
-              placeholder="Notas u observaciones"
-          ></textarea>
-      </div>
-  </div>
+        <div class="p-field">
+            <label for="contactoObservaciones">Observaciones</label>
+            <textarea id="contactoObservaciones" rows="2" pInputTextarea [(ngModel)]="contacto.observaciones"
+                placeholder="Notas u observaciones"></textarea>
+        </div>
+    </div>
 
-  <footer class="modal-footer">
-      <button
-          pButton
-          label="Cancelar"
-          icon="pi pi-times"
-          class="p-button-secondary"
-          (click)="hideContactoDialog()"
-      ></button>
-      <button
-          pButton
-          label="Guardar"
-          icon="pi pi-check"
-          class="p-button-success"
-          (click)="saveContacto()"
-      ></button>
-  </footer>
+    <footer class="modal-footer">
+        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-secondary"
+            (click)="hideContactoDialog()"></button>
+        <button pButton label="Guardar" icon="pi pi-check" class="p-button-success" (click)="saveContacto()"></button>
+    </footer>
 </p-dialog>

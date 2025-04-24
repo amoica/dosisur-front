@@ -18,8 +18,8 @@ interface DashboardItem {
     <div class="mega-dashboard-container">
       <!-- Hero Banner (Compacto) -->
       <div class="hero-banner">
-        <h1 class="hero-title">Bienvenido, [Usuario]</h1>
-        <p class="hero-subtitle">Tu panel de control de Stock</p>
+        <h1 class="hero-title">Bienvenido, Operador Dosisur</h1>
+        <p class="hero-subtitle">Panel de control</p>
       </div>
 
       <!-- Grid de Accesos Directos -->
@@ -176,23 +176,23 @@ export class DashboardWidget {
 
   // Aquí defines todos los accesos directos que deseas:
   items: DashboardItem[] = [
-    { label: 'Dashboard', icon: 'pi pi-home', route: 'dashboard' },
-    { label: 'Usuarios', icon: 'pi pi-user', route: 'usuarios' },
-    { label: 'Clientes', icon: 'pi pi-users', route: 'clientes' },
+    //{ label: 'Dashboard', icon: 'pi pi-home', route: 'dashboard' },
+    //{ label: 'Usuarios', icon: 'pi pi-user', route: 'usuarios' },
+    { label: 'Clientes', icon: 'pi pi-users', route: 'gestion-clientes/cliente' },
     { label: 'Proveedores', icon: 'pi pi-briefcase', route: 'gestion-proveedor/proveedor' },
-    { label: 'Ventas', icon: 'pi pi-dollar', route: 'ventas' },
-    { label: 'Pedidos', icon: 'pi pi-file', route: 'pedidos' },
-    { label: 'O. de Compra', icon: 'pi pi-shopping-cart', route: 'ordenes-compra' },
-    { label: 'Solicitudes', icon: 'pi pi-send', route: 'solicitudes' },
+    //{ label: 'Ventas', icon: 'pi pi-dollar', route: 'ventas' },
+    { label: 'Pedidos', icon: 'pi pi-file', route: 'gestion-general/pedidos' },
+    //{ label: 'O. de Compra', icon: 'pi pi-shopping-cart', route: 'ordenes-compra' },
+    //{ label: 'Solicitudes', icon: 'pi pi-send', route: 'solicitudes' },
     { label: 'Artículos', icon: 'pi pi-box', route: 'gestion-articulos/articulo' },
-    { label: 'Skids', icon: 'pi pi-sitemap', route: 'skids' },
-    { label: 'Componentes', icon: 'pi pi-sliders-h', route: 'componentes' },
-    { label: 'Depósito', icon: 'pi pi-inbox', route: 'deposito' },
-    { label: 'Movimientos', icon: 'pi pi-exchange', route: 'movimientos' },
-    { label: 'Fabricación', icon: 'pi pi-cog', route: 'fabricacion' },
-    { label: 'Notificaciones', icon: 'pi pi-bell', route: 'notificaciones' },
-    { label: 'Perfil', icon: 'pi pi-id-card', route: 'perfil' },
-    { label: 'Configuración', icon: 'pi pi-cog', route: 'configuracion' }
+    { label: 'Skids', icon: 'pi pi-sitemap', route: 'gestion-skids/skid' },
+    { label: 'Componentes', icon: 'pi pi-sliders-h', route: '/gestion-recetas/receta' },
+    //{ label: 'Depósito', icon: 'pi pi-inbox', route: 'deposito' },
+    //{ label: 'Movimientos', icon: 'pi pi-exchange', route: 'movimientos' },
+    //{ label: 'Fabricación', icon: 'pi pi-cog', route: 'fabricacion' },
+    //{ label: 'Notificaciones', icon: 'pi pi-bell', route: 'notificaciones' },
+    //{ label: 'Perfil', icon: 'pi pi-id-card', route: 'perfil' },
+    //{ label: 'Configuración', icon: 'pi pi-cog', route: 'configuracion' }
   ];
 
   goTo(route: string) {

@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-proveedor',
@@ -24,6 +25,7 @@ import { Router } from '@angular/router';
     FormsModule,
     CommonModule,
     ToastModule,
+    CardModule
   ],
   providers: [ConfirmationService, MessageService],
 })

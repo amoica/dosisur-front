@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 import { Contacto } from '../service/proveedor.service';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-cliente',
@@ -25,7 +26,8 @@ import { Contacto } from '../service/proveedor.service';
     ConfirmDialogModule,
     FormsModule,
     CommonModule,
-    ToastModule
+    ToastModule,
+    CardModule
   ],
   providers: [ConfirmationService, MessageService]
 })

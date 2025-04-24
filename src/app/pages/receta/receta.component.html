@@ -63,8 +63,15 @@
       </div>
       <!-- PickList y Tabla para selección de artículos (como antes) -->
       <div class="picklist-section">
-        <p-pickList [source]="availableArticulos" [target]="selectedArticulos" sourceHeader="Artículos Disponibles"
-          targetHeader="Artículos Seleccionados" dragdrop="true" [filterBy]="'name,code'" [showSourceFilter]="true"
+        <p-pickList 
+        #pickList 
+        [source]="availableArticulos" 
+        [target]="selectedArticulos" 
+        sourceHeader="Artículos Disponibles"
+          targetHeader="Artículos Seleccionados" 
+          dragdrop="true" 
+          [filterBy]="'name,code'" 
+          [showSourceFilter]="true"
           [showTargetFilter]="true">
           <ng-template let-articulo pTemplate="item">
             <div class="picklist-item">
@@ -141,7 +148,7 @@
         <ng-template let-receta pTemplate="body">
           <tr>
             <td>
-              <img *ngIf="receta.imagenUrl" [src]="receta.imagenUrl" alt="{{ receta.nombre }}" class="thumbnail"
+              <img *ngIf="receta.imagen" [src]="receta.imagen" alt="{{ receta.nombre }}" class="thumbnail"
                 style="cursor: pointer;" />
             </td>
             <td>{{ receta.nombre }}</td>

@@ -380,3 +380,54 @@ textarea.p-inputtextarea:focus {
     font-size: 0.9rem;
   }
 }
+
+@media (max-width: 1024px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .page-description {
+    font-size: 0.95rem;
+  }
+
+  .modal-section {
+    width: 95%;
+  }
+
+  .decorative-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-grid {
+    gap: 1rem;
+  }
+
+  .proveedores-card h3 {
+    font-size: 1.25rem;
+  }
+}
