@@ -20,6 +20,10 @@ import { RecetaService } from '../../../service/receta.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { OrdenFabricacionService } from '../../../service/orden-fabricacion.service';
+import { YacimientoService } from '../../../service/yacimiento.service';
+import { Yacimiento } from '../../../yacimiento/yacimiento.interface';
+import { ArticuloServiceService } from '../../../service/articulo-service.service';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 
 
@@ -41,7 +45,8 @@ import { OrdenFabricacionService } from '../../../service/orden-fabricacion.serv
     IftaLabelModule,
     SelectModule,
     MultiSelectModule,
-    RadioButton
+    RadioButton,
+    InputNumberModule
   ],
   standalone: true,
   templateUrl: './orden-fabricacion-modal.component.html',
@@ -69,19 +74,10 @@ export class OrdenFabricacionModalComponent implements OnInit {
     { name: 'ELECTRICO', code: 'ELECTRICO' },
     { name: 'RESERVA', code: 'RESERVA' }
   ]; // Ej: [{ label: 'Skid Solar - 100lts', value: 'skid1' }, ... ]
-  bombaOptions: any[] = []; // Datos de bombas
   tableroOptions: any[] = []; // Datos de tableros
   instrumentoOptions: any[] = []; // Datos de instrumentos
   clientes: Cliente[] = [];
   skids: any[] = [];
-  potenciaPaneles: any[] = [
-    { name: '1 de 380W', code: '1 de 380W' },
-    { name: '2 de 380W', code: '2 de 380W' },
-    { name: '1 de 450W', code: '1 de 450W' },
-    { name: '2 de 450W', code: '2 de 450W' },
-    { name: '1 de 160W', code: '1 de 160W' },
-    { name: 'No aplica', code: 'No aplica' }
-  ];
 
   baterias: any[] = [
     { name: '1', code: '1' },
@@ -90,13 +86,6 @@ export class OrdenFabricacionModalComponent implements OnInit {
     { name: '4', code: '4' },
     { name: 'No aplica', code: 'No aplica' }
   ]
-
-  bombas: any[] = [
-    { name: 'SIN BOMBA', code: 'SIN BOMBA' },
-    { name: 'Baja Presión (menos a 200 kgF)', code: 'Baja Presión' },
-    { name: 'Alta Presión (mayor a 200)', code: 'Alta Presión' },
-    { name: 'Motor APE', code: 'Motor APE' },
-  ];
 
   tanque: any[] = [
     { name: 'SI', key: true },
@@ -108,8 +97,21 @@ export class OrdenFabricacionModalComponent implements OnInit {
     { name: 'NO', key: false },
   ]
   today: Date = new Date();
+  yacimientoOptions: { label: string; value: number }[] = [];  // <- nuevas opciones
 
-  constructor(private fb: FormBuilder, private clienteService: ClienteService, private skidService: ProductoFabricadoService, private componentService: RecetaService, private ordenService: OrdenFabricacionService) {
+  panelOptions: Array<{ name: string; id: number }> = [];
+  bombaOptions: Array<{ name: string; id: number }> = [];
+  showPaneles = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private clienteService: ClienteService,
+    private skidService: ProductoFabricadoService,
+    private componentService: RecetaService,
+    private ordenService: OrdenFabricacionService,
+    private yacService: YacimientoService,
+    private insumoService: ArticuloServiceService) {
+
     this.steps = [
       { label: 'Información General' },
       { label: 'Configuración Skid' },
@@ -124,8 +126,8 @@ export class OrdenFabricacionModalComponent implements OnInit {
       prioridad: ["", Validators.required],
       fechaEntrega: ["", Validators.required],
       contacto: [{ value: null, disabled: true }, Validators.required],
-      nroOC: [""],
-      yacimiento: ["", Validators.required],
+      nroOC: ["", Validators.required],
+      yacimiento: [{ value: null, disabled: true }, Validators.required],
       observaciones: [""],
       pto: [""],
       // Los datos de fileUpload se gestionan en onFileSelect
@@ -133,9 +135,18 @@ export class OrdenFabricacionModalComponent implements OnInit {
       cantidadSkid: [1, Validators.required],
       tipoSkid: [null, Validators.required],
       skid: [{ value: null, disabled: true }, Validators.required],
-      potenciaPaneles: [{ value: 'No aplica', disabled: true }],
-      baterias: [{ value: 'No aplica', disabled: true }],
-      bombas: ["", Validators.required],
+      paneles: this.fb.array([
+        this.fb.group({
+          modelo: [null, Validators.required],   // code o id del panel
+          cantidad: [1, [Validators.required, Validators.min(1)]],
+        })
+      ]), baterias: [{ value: 'No aplica', disabled: true }],
+      bombasDet: this.fb.array([
+        this.fb.group({
+          modelo: [null, Validators.required],   // code o id de la bomba
+          cantidad: [1, [Validators.required, Validators.min(1)]],
+        })
+      ]),
       psv: [""],
       tanque: [false, Validators.required],
       calibracion: [false, Validators.required],
@@ -153,45 +164,78 @@ export class OrdenFabricacionModalComponent implements OnInit {
     this.loadData();
     this.cargarCompnentes();
 
-    this.formOrden.get('cliente')?.valueChanges.subscribe((cliente) => {
-      if (cliente) {
-        let contactos = this.clientes.find(c => c.id === cliente)?.contactos;
-        this.contactosOptions = contactos!.map(contacto => ({ label: contacto.nombre, value: contacto.id }));
-        this.formOrden.get('contacto')?.enable();
+    this.insumoService.getInsumos({ tipoInsumo: 'panel' })
+      .subscribe(list => this.panelOptions = list); // list ya trae {name, id}
+
+
+    this.formOrden.get('cliente')!.valueChanges.subscribe(clienteId => {
+      if (clienteId) {
+        // 1) habilita contacto (como ya tenías)
+        const contactos = this.clientes.find(c => c.id === clienteId)?.contactos || [];
+        this.contactosOptions = contactos.map(ct => ({ label: ct.nombre, value: ct.id }));
+        this.formOrden.get('contacto')!.enable();
+
+        // 2) pide al backend los yacimientos
+        this.yacService.findByCliente(clienteId).subscribe((list: Yacimiento[]) => {
+          this.yacimientoOptions = list.map(y => ({ label: y.nombre!, value: y.id! }));
+          this.formOrden.get('yacimiento')!.enable();
+        });
+      } else {
+        // si quita la selección, limpiamos y deshabilitamos
+        this.formOrden.get('contacto')!.reset();
+        this.formOrden.get('contacto')!.disable();
+        this.formOrden.get('yacimiento')!.reset();
+        this.formOrden.get('yacimiento')!.disable();
+        this.yacimientoOptions = [];
       }
-      else {
-        this.contactosOptions = [];
-        this.formOrden.get('contacto')?.setValue(null);
-        this.formOrden.get('contacto')?.disable();
-      }
-    })
+    });
 
     this.formOrden.get('tipoSkid')?.valueChanges.subscribe((tipoSkid) => {
+      if (tipoSkid) {
+        this.insumoService.getInsumos({ tipoInsumo: 'bomba', categoria: tipoSkid })
+          .subscribe(list => this.bombaOptions = list); // {name, id}
+      } else {
+        this.bombaOptions = [];
+      }
+    });
+
+    // UNIFICADO: controlar paneles + cargar bombas + cargar skids + habilitar campos
+    this.formOrden.get('tipoSkid')?.valueChanges.subscribe((tipoSkid) => {
+      // Mostrar paneles solo si es SOLAR
+      this.showPaneles = tipoSkid === 'SOLAR';
+      if (!this.showPaneles) {
+        while (this.panelesFA.length > 1) this.panelesFA.removeAt(this.panelesFA.length - 1);
+        this.panelesFA.at(0).patchValue({ modelo: null, cantidad: 1 });
+      }
+
+      // Bombas por categoría
+      if (tipoSkid) {
+        this.insumoService.getInsumos({ tipoInsumo: 'bomba', categoria: tipoSkid })
+          .subscribe(list => this.bombaOptions = list);
+      } else {
+        this.bombaOptions = [];
+      }
+
+      // Skids por tipo
       if (tipoSkid) {
         this.skidService.getSkidByTipo(tipoSkid).subscribe((data) => {
           this.skids = data.map((skid) => ({ label: `${skid.nombre}, lts: ${skid.lts}`, value: skid.id }));
           this.formOrden.get('skid')?.enable();
 
           if (tipoSkid === 'SOLAR') {
-            this.formOrden.get('potenciaPaneles')?.enable();
             this.formOrden.get('baterias')?.enable();
           } else {
-            this.formOrden.get('potenciaPaneles')?.setValue('No aplica');
-            this.formOrden.get('potenciaPaneles')?.disable();
             this.formOrden.get('baterias')?.setValue('No aplica');
             this.formOrden.get('baterias')?.disable();
           }
-
         });
       } else {
         this.skids = [];
         this.formOrden.get('skid')?.setValue(null);
         this.formOrden.get('skid')?.disable();
-        this.formOrden.get('potenciaPaneles')?.setValue('No aplica');
         this.formOrden.get('baterias')?.setValue('No aplica');
       }
-
-    })
+    });
     // Cargar otras opciones necesarias (skid, bombas, tableros, etc.)
     // this.loadOtherOptions();
   }
@@ -215,10 +259,64 @@ export class OrdenFabricacionModalComponent implements OnInit {
     })
   }
 
+  get panelesFA() { return this.formOrden.get('paneles') as import('@angular/forms').FormArray; }
+  get bombasFA() { return this.formOrden.get('bombasDet') as import('@angular/forms').FormArray; }
+
+
   nextStep() {
-    if (this.activeIndex < this.steps.length - 1) {
+    // Validar el paso actual antes de avanzar
+    if (this.activeIndex === 0) {
+      this.validateStep1();
+    } else if (this.activeIndex === 1) {
+      this.validateStep2();
+    }
+
+    if (this.activeIndex < this.steps.length - 1 && this.isStepValid(this.activeIndex)) {
       this.activeIndex++;
     }
+  }
+
+  // Verifica si el paso actual es válido
+  isStepValid(stepIndex: number): boolean {
+    if (stepIndex === 1) {
+      const arraysOk = this.panelesFA.valid && this.bombasFA.valid;
+      return this.formOrden.get('cantidadSkid')!.valid &&
+        this.formOrden.get('tipoSkid')!.valid &&
+        this.formOrden.get('skid')!.valid &&
+        arraysOk &&
+        this.formOrden.get('tanque')!.valid &&
+        this.formOrden.get('calibracion')!.valid;
+    }
+    // resto igual
+    return stepIndex === 0
+      ? /* tu validación del paso 1 */
+      this.formOrden.get('codigo')!.valid &&
+      this.formOrden.get('cliente')!.valid &&
+      this.formOrden.get('prioridad')!.valid &&
+      this.formOrden.get('fechaEntrega')!.valid &&
+      this.formOrden.get('contacto')!.valid &&
+      this.formOrden.get('yacimiento')!.valid
+      : true;
+  }
+
+  // Validación específica para el paso 1
+  validateStep1() {
+    const step1Controls = [
+      'codigo', 'cliente', 'prioridad',
+      'fechaEntrega', 'contacto', 'yacimiento'
+    ];
+
+    step1Controls.forEach(controlName => {
+      this.formOrden.get(controlName)?.markAsTouched();
+    });
+  }
+
+  // Validación específica para el paso 2
+  validateStep2() {
+    ['cantidadSkid', 'tipoSkid', 'skid', 'tanque', 'calibracion']
+      .forEach(n => this.formOrden.get(n)?.markAsTouched());
+    this.panelesFA.controls.forEach(c => c.markAllAsTouched());
+    this.bombasFA.controls.forEach(c => c.markAllAsTouched());
   }
 
   prevStep() {
@@ -228,55 +326,54 @@ export class OrdenFabricacionModalComponent implements OnInit {
   }
 
   confirm(): void {
-    // Se construye un objeto final con solo los campos necesarios
-    const formValue = this.formOrden.value;
+    const v = this.formOrden.value;
 
-    // Armar el objeto snapshotSkid con los datos de la configuración del skid
+    // Normalizo arrays (si no hay, mando [])
+    const paneles = (v.paneles ?? []).map((it: any) => ({
+      insumoId: Number(it.modelo),     // <-- ID del panel
+      cantidad: Number(it.cantidad),   // <-- Cantidad
+      tipo: 'panel'                    // opcional si te sirve en backend
+    }));
+
+    const bombas = (v.bombasDet ?? []).map((it: any) => ({
+      insumoId: Number(it.modelo),     // <-- ID de la bomba
+      cantidad: Number(it.cantidad),   // <-- Cantidad
+      tipo: 'bomba'                    // opcional
+    }));
+
     const snapshotSkid = {
-      // en el resumen se muestra el nombre a través de un helper, pero aquí se envía el valor
-      potenciaPaneles: formValue.potenciaPaneles,
-      baterias: formValue.baterias,
-      bombas: formValue.bombas,
-      tanque: formValue.tanque,
-      calibracion: formValue.calibracion,
-      psv: formValue.psv,
-      tableros: formValue.tableros,
-      instrumentos: formValue.instrumentos,
-      productoFabricadoId: formValue.skid,
-
+      paneles,             // ej: [{insumoId:53048, cantidad:2}, ...]
+      bombas,              // ej: [{insumoId:123, cantidad:1}, ...]
+      tanque: v.tanque,
+      calibracion: v.calibracion,
+      psv: v.psv,
+      tableros: v.tableros,            // si son IDs, OK; si no, mapear igual que arriba
+      instrumentos: v.instrumentos,
+      productoFabricadoId: v.skid
     };
 
-    // Construir el objeto final de la orden, extrayendo solo los campos esenciales
     const orderDataFinal = {
-      cantidad: formValue.cantidadSkid,
-      productoFabricadoId: formValue.skid,
-      codigo: formValue.codigo,
-      yacimiento: formValue.yacimiento,
-      observaciones: formValue.observaciones,
-      nroPresupuesto: formValue.pto,
-      prioridad: formValue.prioridad,
-      fechaEntrega: formValue.fechaEntrega,
+      cantidad: v.cantidadSkid,
+      productoFabricadoId: v.skid,
+      codigo: v.codigo,
+      yacimiento: v.yacimiento,
+      observaciones: v.observaciones,
+      nroPresupuesto: v.pto,
+      prioridad: v.prioridad,
+      fechaEntrega: v.fechaEntrega,
       pedidoCliente: {
-        numero: formValue.nroOC,
-        adjunto: formValue.fileOC ? formValue.fileOC : null,
-        clienteId: formValue.cliente,
-        contactoId: formValue.contacto,
+        numero: v.nroOC,
+        adjunto: v.fileOC ?? null,
+        clienteId: v.cliente,
+        contactoId: v.contacto,
       },
-      // Si tienes fileOC, asegúrate de haberlo subido previamente y almacenar su URL o path
       snapshotSkid
     };
-
-    console.log("Orden de Fabricación final a enviar:", orderDataFinal);
 
     this.ordenService.createOrdenFabricacion(orderDataFinal).subscribe((data) => {
       this.closeModal.emit(data);
       this.close();
-    })
-
-    // Llama a tu servicio backend para crear la orden de fabricación
-    // this.backendService.createOrdenFabricacion(orderDataFinal).subscribe(res => { ... });
-
-
+    });
   }
 
   cancel() {
@@ -327,24 +424,6 @@ export class OrdenFabricacionModalComponent implements OnInit {
     return '–';
   }
 
-  // Helper para Bombas (en caso de multiselect, se espera un array)
-  getBombasNames(): string {
-    if (this.formOrden.value.bombas) {
-      // Si es array:
-      if (Array.isArray(this.formOrden.value.bombas)) {
-        return this.formOrden.value.bombas.map((code: string) => {
-          const found = this.bombas.find(b => b.code === code);
-          return found ? found.name : code;
-        }).join(', ');
-      } else {
-        // Si viene como string:
-        const found = this.bombas.find(b => b.code === this.formOrden.value.bombas);
-        return found ? found.name : this.formOrden.value.bombas;
-      }
-    }
-    return '–';
-  }
-
   getSkidName(): string {
     const selectedSkid = this.skids.find((item) => item.value === this.formOrden.value.skid);
     return selectedSkid ? selectedSkid.label : this.formOrden.value.skid;
@@ -376,5 +455,46 @@ export class OrdenFabricacionModalComponent implements OnInit {
         pdf.save(`orden_fabricacion_${new Date().getTime()}.pdf`);
       });
     }
+  }
+
+
+  addPanel() {
+    this.panelesFA.push(this.fb.group({
+      modelo: [null, Validators.required],
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+    }));
+  }
+
+  removePanel(i: number) { this.panelesFA.removeAt(i); }
+
+  addBomba() {
+    const totalPermitido = 4 * (this.formOrden.get('cantidadSkid')?.value || 1);
+    const totalActual = this.bombasFA.value.reduce((acc: number, it: any) => acc + (Number(it.cantidad) || 0), 0);
+    if (totalActual >= totalPermitido) return; // corta en seco
+    this.bombasFA.push(this.fb.group({
+      modelo: [null, Validators.required],
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+    }));
+  }
+
+  removeBomba(i: number) { this.bombasFA.removeAt(i); }
+
+
+  private getNombreById(list: { name: string; id: number }[], id: any): string {
+    return list.find(x => String(x.id) === String(id))?.name ?? String(id ?? '–');
+  }
+
+  getBombasNames(): string {
+    if (!this.bombasFA?.value?.length) return '–';
+    return this.bombasFA.value
+      .map((it: any) => `${this.getNombreById(this.bombaOptions, it.modelo)} x${Number(it.cantidad) || 0}`)
+      .join(', ');
+  }
+
+  getPanelesNames(): string {
+    if (!this.panelesFA?.value?.length) return '–';
+    return this.panelesFA.value
+      .map((it: any) => `${this.getNombreById(this.panelOptions, it.modelo)} x${Number(it.cantidad) || 0}`)
+      .join(', ');
   }
 }

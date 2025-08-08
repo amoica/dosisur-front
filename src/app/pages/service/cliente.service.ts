@@ -43,6 +43,7 @@ export class ClienteService {
   }
 
   updateCliente(id: number, cliente: Cliente): Observable<Cliente> {
+    console.log(cliente);
     return this.http.patch<Cliente>(`${this.apiUrl}/${id}`, cliente);
   }
 

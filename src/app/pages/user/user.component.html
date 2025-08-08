@@ -1,0 +1,173 @@
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<div class="container">
+  <p-card class="user-management-card">
+    <div class="header-section">
+      <div class="title-group">
+        <h1 class="page-title">Gestión de Usuarios</h1>
+        <p class="page-description">
+          Administra y gestiona toda la información de los usuarios del sistema
+        </p>
+      </div>
+
+      <div class="action-toolbar">
+        <div class="search-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input #searchInput pInputText placeholder="Buscar usuarios..."
+              (input)="dt.filterGlobal(searchInput.value, 'contains')" />
+          </span>
+        </div>
+        <button pButton label="Nuevo Usuario" icon="pi pi-user-plus" class="p-button-raised p-button-primary"
+          (click)="openNew()"></button>
+      </div>
+    </div>
+
+    <p-table #dt [value]="users" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5,10,25]"
+      [globalFilterFields]="['email','profile.firstName','profile.lastName','role.name']"
+      styleClass="p-datatable-striped p-datatable-gridlines" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="email" style="width: 25%">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th pSortableColumn="profile.firstName" style="width: 20%">Nombre <p-sortIcon
+              field="profile.firstName"></p-sortIcon></th>
+          <th pSortableColumn="profile.lastName" style="width: 20%">Apellido <p-sortIcon
+              field="profile.lastName"></p-sortIcon></th>
+          <th pSortableColumn="role.name" style="width: 15%">Rol <p-sortIcon field="role.name"></p-sortIcon></th>
+          <th style="width: 20%; text-align: center">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.email }}</td>
+          <td>{{ user.profile?.firstName || '—' }}</td>
+          <td>{{ user.profile?.lastName || '—' }}</td>
+          <td><span class="role-badge" [style.background]="getRoleColor(user.role?.name)">{{ user.role?.name || '—'
+              }}</span></td>
+          <td class="action-buttons">
+            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-text p-button-plain"
+              tooltip="Ver detalles" (click)="openEdit(user)"></button>
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-help" tooltip="Editar"
+              (click)="openEdit(user)"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" tooltip="Eliminar"
+              (click)="confirmDelete(user)"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="empty-table-message">
+            <div class="empty-content">
+              <i class="pi pi-users" style="font-size: 2rem"></i>
+              <p>No se encontraron usuarios</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>
+
+<!-- User Form Dialog -->
+<p-dialog [(visible)]="dialogVisible" [modal]="true" [style]="{width: '750px'}"
+  [breakpoints]="{'960px': '90vw', '640px': '95vw'}" [draggable]="false" [resizable]="false"
+  [header]="isEdit ? 'Editar Usuario' : 'Nuevo Usuario'" (onHide)="hideDialog()">
+
+  <div class="user-form-container">
+    <div class="form-left-section">
+      <div class="avatar-upload-container">
+        <div class="avatar-preview">
+          <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Avatar" class="avatar-image">
+          <div *ngIf="!avatarPreview" class="avatar-placeholder">
+            <i class="pi pi-user"></i>
+            <span>Subir foto</span>
+          </div>
+          <!-- ESTE INPUT SE “APOYA” SOBRE toda el área clickable -->
+          <input type="file" accept="image/*" class="avatar-file-input" (change)="onAvatarChange($event)" />
+        </div>
+        <small class="upload-hint">Formatos soportados: JPG, PNG (Max. 1MB)</small>
+      </div>
+
+      <div class="form-section">
+        <h4>Credenciales</h4>
+        <div class="p-fluid">
+          <div class="p-field">
+            <label for="email">Correo electrónico *</label>
+            <input id="email" type="email" pInputText [(ngModel)]="formData.email" placeholder="usuario@dominio.com"
+              [disabled]="isEdit">
+          </div>
+
+          <div class="p-field">
+            <label for="password">{{ isEdit ? 'Nueva contraseña' : 'Contraseña *' }}</label>
+            <p-password id="password" [(ngModel)]="formData.password" [feedback]="!isEdit" [toggleMask]="true"
+              placeholder="••••••••" [inputStyle]="{width: '100%'}"></p-password>
+          </div>
+
+          <div class="p-field">
+            <label for="role">Rol del usuario *</label>
+            <p-dropdown id="role" [options]="roleOptions" optionLabel="label" optionValue="value"
+              [(ngModel)]="formData.roleId" placeholder="Seleccionar rol"></p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-right-section">
+      <div class="form-section">
+        <h4>Información personal</h4>
+        <div class="p-fluid">
+          <div class="p-grid">
+            <div class="p-col-6 p-field">
+              <label for="firstName">Nombre</label>
+              <input id="firstName" type="text" pInputText [(ngModel)]="formData.firstName" placeholder="Juan">
+            </div>
+            <div class="p-col-6 p-field">
+              <label for="lastName">Apellido</label>
+              <input id="lastName" type="text" pInputText [(ngModel)]="formData.lastName" placeholder="Pérez">
+            </div>
+          </div>
+
+          <div class="p-field">
+            <label for="dni">Documento de identidad</label>
+            <input id="dni" type="text" pInputText [(ngModel)]="formData.dni" placeholder="12345678">
+          </div>
+
+          <div class="p-field">
+            <label for="phone">Teléfono</label>
+            <input id="phone" type="text" pInputText [(ngModel)]="formData.phone" placeholder="+51 987654321">
+          </div>
+
+          <div class="p-field">
+            <label for="address">Dirección</label>
+            <textarea id="address" pInputTextarea [(ngModel)]="formData.address" rows="2"
+              placeholder="Av. Principal 123, Lima"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="isEdit">
+        <h4>Opciones avanzadas</h4>
+        <div class="advanced-options">
+          <button pButton label="Resetear contraseña" icon="pi pi-key" class="p-button-outlined p-button-warning"
+            (click)="resetPassword(formData.id)"></button>
+          <small>Esto enviará un correo al usuario con instrucciones para crear una nueva contraseña.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <footer>
+    <div class="dialog-footer">
+      <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()">
+      </button>
+      <button pButton [label]="isEdit ? 'Actualizar usuario' : 'Crear usuario'" icon="pi pi-check"
+        class="p-button-primary" (click)="saveUser()"
+        [disabled]="!formData.email || (!isEdit && !formData.password) || !formData.roleId">
+      </button>
+    </div>
+  </footer>
+
+</p-dialog>

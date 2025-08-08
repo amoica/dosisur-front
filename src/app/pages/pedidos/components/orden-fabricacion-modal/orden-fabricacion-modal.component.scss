@@ -1,25 +1,422 @@
+/* --------- Dialog / Overlay fixes --------- */
+/* No forzar visible: dejamos que el dialog scrollee con contentStyle */
+:host ::ng-deep .p-dialog .p-dialog-content {
+  overflow: auto !important;
+}
+
+:host ::ng-deep .p-overlay {
+  z-index: 1300 !important;
+  /* sobre el dialog */
+}
+
 :host ::ng-deep .p-datepicker .p-inputtext {
   width: 100% !important;
 }
 
-
-.datos-generales,
-.observaciones,
-.detalles-skid {
-  margin-bottom: 1.5rem;
+/* --------- Layout base --------- */
+.wizard-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface-card);
+  padding-bottom: .5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border);
 }
 
-.datos-generales h3,
-.observaciones h3,
-.detalles-skid h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+.wizard-content {
+  padding: .5rem 0 0;
 }
 
-.datos-generales p,
-.observaciones p,
-.detalles-skid p {
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
+.card-section {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: .75rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+}
+
+.section-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: .75rem;
+  margin-bottom: .75rem;
+
+  i {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    margin-top: .15rem;
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+
+  .section-hint {
+    grid-column: 2 / 3;
+    margin: .25rem 0 0;
+    color: var(--text-color-secondary);
+    font-size: .875rem;
+  }
+}
+
+.p-fluid.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .p-fluid.form-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 960px) {
+  .p-fluid.form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .p-fluid.form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+
+  label {
+    font-weight: 600;
+    font-size: .9rem;
+  }
+
+  .hint {
+    font-size: .75rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+/* --------- Subsections (Paneles / Bombas) --------- */
+.subsection {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px dashed var(--surface-border);
+  border-radius: .75rem;
+  background: var(--surface-ground);
+}
+
+.subsection-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .5rem;
+
+  i {
+    color: var(--primary-color);
+  }
+
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .meta {
+    margin-left: auto;
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+  }
+}
+
+/* Fila de select + cantidad + eliminar
+   - Primera col crece y puede encogerse (min-width:0 evita overflow del p-select)
+   - Anchos fijos para qty y botón */
+.row-repeat {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: nowrap;
+  /* fuerza todo en una sola línea mientras haya espacio */
+  margin-bottom: .5rem;
+}
+
+.row-repeat .col-main {
+  flex: 1 1 420px;
+  /* base 420px, puede crecer y encogerse */
+  min-width: 0;
+  /* clave: permite al p-select achicarse sin empujar */
+}
+
+/* CLAVE: permite que el select no fuerce overflow */
+.row-repeat .col-qty {
+  flex: 0 0 120px;
+  /* ancho fijo */
+}
+
+.row-repeat .col-actions {
+  width: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.row-repeat .icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* Mobile: apilar y evitar desbordes */
+@media (max-width: 640px) {
+  .row-repeat {
+    grid-template-columns: 1fr;
+  }
+
+  .row-repeat .col-qty,
+  .row-repeat .col-actions {
+    width: 100%;
+  }
+
+  .row-repeat .col-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* --------- Radios inline --------- */
+.inline-options {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* --------- Note --------- */
+.note {
+  font-size: .85rem;
+  color: var(--text-color-secondary);
+  margin-top: .5rem;
+}
+
+/* --------- Summary --------- */
+.summary-wrap {
+  padding: .5rem;
+}
+
+.summary-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: .75rem;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 6%);
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+
+  .brand {
+    display: flex;
+    gap: .65rem;
+    align-items: center;
+
+    i {
+      color: var(--primary-color);
+      font-size: 1.25rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    .muted {
+      color: var(--text-color-secondary);
+      display: block;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+  }
+}
+
+.id-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px dashed var(--surface-border);
+  background: var(--surface-ground);
+
+  .item {
+    display: flex;
+    gap: .5rem;
+  }
+
+  .label {
+    color: var(--text-color-secondary);
+    min-width: 90px;
+  }
+
+  .value {
+    font-weight: 600;
+  }
+
+  .muted {
+    color: var(--text-color-secondary);
+  }
+}
+
+.summary-grid {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+
+  .span2 {
+    grid-column: 1 / -1;
+  }
+}
+
+.summary-section {
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0 0 .5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+  }
+
+  @media (max-width: 640px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .preline {
+    white-space: pre-line;
+  }
+}
+
+@media (max-width: 900px) {
+  .id-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--surface-border);
+  border-radius: .65rem;
+  padding: .9rem 1rem;
+}
+
+.card-title {
+  margin: 0 0 .6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem .75rem;
+
+  .span2 {
+    grid-column: 1 / -1;
+  }
+
+  .k {
+    color: var(--text-color-secondary);
+    display: block;
+  }
+
+  .v {
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 640px) {
+  .kv {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-footer {
+  border-top: 1px solid var(--surface-border);
+  padding: .6rem 1rem;
+  display: flex;
+  justify-content: center;
+
+  .meta {
+    display: flex; gap: 1.25rem; color: var(--text-color-secondary); font-size: .85rem;
+  }
+  @media (max-width:640px) {
+    .meta { flex-direction: column; gap: .25rem; align-items: center; }
+  }
+}
+
+/* Componentes con chips */
+.comp-block + .comp-block { margin-top: .75rem; }
+.comp-block h4 {
+  margin: 0 0 .35rem; font-weight: 700; font-size: .95rem; display: flex; gap: .4rem; align-items: center;
+  i { color: var(--primary-color); }
+}
+.chip-list { display: flex; flex-wrap: wrap; gap: .4rem .5rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .25rem .5rem; border: 1px solid var(--surface-border);
+  border-radius: 999px; background: var(--surface-ground); font-size: .85rem;
+}
+.chip b { font-weight: 800; }
+
+/* Observaciones */
+.preline { white-space: pre-line; }
+
+
+/* --------- Footer dentro del modal --------- */
+.wizard-footer {
+  display: flex;
+  justify-content: center;
+  gap: .75rem;
+  padding: .5rem .25rem;
+  background: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  /* sin sticky, lo fija Prime en el template del dialog */
+}
+
+/* --------- Errores --------- */
+:host ::ng-deep .p-invalid {
+  border-color: #f44336 !important;
+}
+
+:host ::ng-deep .p-error {
+  color: #f44336;
+  font-size: .75rem;
+  margin-top: .1rem;
+}
+
+.field :where(.p-dropdown, .p-select, .p-multiselect, .p-inputnumber) {
+  width: 100%;
 }

@@ -1,0 +1,91 @@
+<p-card class="page-card">
+  <div class="p-grid header-grid">
+    <div class="p-col-12">
+      <h1 class="page-title">{{ title }}</h1>
+      <p class="page-description">{{ description }}</p>
+    </div>
+    <div class="p-col-12 toolbar">
+      <div class="search-wrapper">
+        <input
+          #dtSearch
+          pInputText
+          placeholder="Buscar…"
+          class="search-input"
+          (input)="dt.filterGlobal(dtSearch.value, 'contains')"
+        />
+        <button pButton icon="pi pi-search" class="p-button-outlined search-button"></button>
+      </div>
+      <button
+        *ngIf="showAddButton"
+        pButton
+        label="Nuevo"
+        icon="pi pi-plus"
+        class="p-button-primary new-button"
+        (click)="onAdd.emit()"
+      ></button>
+    </div>
+  </div>
+
+  <p-table
+    #dt
+    [value]="data"
+    [paginator]="true"
+    [rows]="10"
+    [globalFilterFields]="globalFilterFields"
+    sortMode="multiple"
+    responsiveLayout="scroll"
+    showCurrentPageReport
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
+    class="minimal-table"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th *ngFor="let col of columns" pSortableColumn="{{col.field}}">
+          {{ col.header }} <p-sortIcon [field]="col.field"></p-sortIcon>
+        </th>
+        <th class="text-center">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td *ngFor="let col of columns">
+          {{ getColumnValue(row, col.field) }}
+        </td>
+        <td class="text-center">
+          <ng-container *ngIf="customActionsTemplate; else defaults">
+            <ng-container
+              *ngTemplateOutlet="
+                customActionsTemplate;
+                context: { $implicit: row }
+              "
+            ></ng-container>
+          </ng-container>
+          <ng-template #defaults>
+            <button
+              pButton
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-info mr-2"
+              (click)="onView.emit(row)"
+              title="Ver"
+            ></button>
+            <button
+              pButton
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-warning mr-2"
+              (click)="onEdit.emit(row)"
+              title="Editar"
+            ></button>
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger"
+              (click)="onDelete.emit(row)"
+              title="Eliminar"
+            ></button>
+          </ng-template>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>

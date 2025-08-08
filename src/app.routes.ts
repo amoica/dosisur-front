@@ -10,7 +10,8 @@ export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
-        canActivate:[authGuard],
+        canActivateChild: [authGuard],
+        runGuardsAndResolvers: 'always',
         children: [
             { path: '', component: Dashboard },
             { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
@@ -21,6 +22,9 @@ export const appRoutes: Routes = [
             { path: 'gestion-depositos', loadChildren: () => import('./app/pages/deposito/deposito.route') },
             { path: 'gestion-proveedor', loadChildren: () => import('./app/pages/proveedor/proveedor.route') },
             { path: 'gestion-general', loadChildren: () => import('./app/pages/pedidos/pedidos.router') },
+            { path: 'gestion-usuarios', loadChildren: () => import('./app/pages/user/user.route') },
+            { path: 'gestion-roles-permisos', loadChildren: () => import('./app/pages/roles/roles.route') },
+            { path: 'gestion-yacimientos', loadChildren: () => import('./app/pages/yacimiento/yacimiento.route') },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]

@@ -1,0 +1,86 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '450px' }"
+  [header]="title"
+  (onHide)="onCancel()"
+>
+  <!-- —— CUERPO DEL FORMULARIO —— -->
+  <div class="form-grid">
+    <ng-container *ngFor="let f of formFields">
+      <div class="p-field" [ngClass]="{ 'full-width': f.type === 'textarea' }">
+        <label [for]="f.key">
+          {{ f.label }}
+          <span *ngIf="f.required" class="required">*</span>
+        </label>
+
+        <!-- textarea -->
+        <textarea
+          *ngIf="f.type === 'textarea'"
+          id="{{ f.key }}"
+          pInputTextarea
+          rows="3"
+          [(ngModel)]="formData[f.key]"
+          [placeholder]="f.placeholder"
+        ></textarea>
+
+        <!-- select -->
+        <p-dropdown
+          *ngIf="f.type === 'select'"
+          id="{{ f.key }}"
+          [options]="getOptions(f)"
+          [(ngModel)]="formData[f.key]"
+          [placeholder]="f.placeholder || 'Selecciona...'"
+        ></p-dropdown>
+
+        <!-- checkbox -->
+        <p-checkbox
+          *ngIf="f.type === 'checkbox'"
+          inputId="{{ f.key }}"
+          binary="true"
+          [(ngModel)]="formData[f.key]"
+        ></p-checkbox>
+
+        <!-- input genérico -->
+        <div
+          *ngIf="!['textarea','select','checkbox'].includes(f.type)"
+          class="p-input-icon-left"
+          [ngClass]="{ 'has-icon': f.icon }"
+        >
+          <i *ngIf="f.icon" [class]="'pi ' + f.icon"></i>
+          <input
+            id="{{ f.key }}"
+            [type]="f.type"
+            pInputText
+            [(ngModel)]="formData[f.key]"
+            [placeholder]="f.placeholder"
+          />
+        </div>
+
+        <small *ngIf="f.errorMessages?.required" class="p-error">
+          {{ f.errorMessages.required }}
+        </small>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-template pFooter>
+    <div class="dialog-footer">
+      <button
+        pButton
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="onCancel()"
+      ></button>
+      <button
+        pButton
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-primary"
+        (click)="onSave()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>

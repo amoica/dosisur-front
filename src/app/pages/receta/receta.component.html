@@ -1,177 +1,180 @@
-<div class="receta-container">
+<p-card class="main-container-card">
 
-  <!-- Encabezado con botones de modo moderno -->
-  <div class="receta-header modern-buttons">
-    <button pButton type="button" icon="pi pi-plus" label="Crear Componente"
-      [class]="activeTab === 'create' ? 'p-button-primary' : 'p-button-outlined p-button-secondary'"
-      (click)="setActiveTab('create')"></button>
-    <button pButton type="button" icon="pi pi-list" label="Listar Componentes"
-      [class]="activeTab === 'list' ? 'p-button-primary' : 'p-button-outlined p-button-secondary'"
-      (click)="setActiveTab('list')"></button>
+  <div class="receta-title">
+    <h1 class="page-title">Área de Gestión de Componentes</h1>
+    <p class="page-description">Aquí puedes crear, editar y guardar tus componentes de manera ágil y profesional.</p>
   </div>
 
-  <!-- Modo: Crear Componente -->
-  <div *ngIf="activeTab === 'create'" class="receta-form">
-    <p-card header="Crear Componente" subheader="Ingrese la información del nuevo componente" styleClass="card-create">
-      <div class="p-grid">
-        <!-- Nombre del Componente -->
-        <div class="p-col-12 p-md-4 order-md-1">
-          <div class="form-group">
-            <label for="recetaName">Nombre del Componente</label>
-            <input id="recetaName" type="text" pInputText [(ngModel)]="recetaForm.name" placeholder="Ingrese el nombre"
-              class="input-rounded" />
+  <p-tabView [(activeIndex)]="activeIndex" styleClass="modern-tabview">
+    <p-tabPanel header="Crear Componente" leftIcon="pi pi-plus">
+      <!-- Modo: Crear Componente -->
+      <div class="receta-form">
+        <div class="p-grid">
+          <!-- Nombre del Componente -->
+          <div class="p-col-12 p-md-4 order-md-1">
+            <div class="form-group">
+              <label for="recetaName">Nombre del Componente</label>
+              <input id="recetaName" type="text" pInputText [(ngModel)]="recetaForm.name"
+                placeholder="Ingrese el nombre" class="input-rounded" />
+            </div>
+          </div>
+          <!-- Código -->
+          <div class="p-col-12 p-md-4 order-md-2">
+            <div class="form-group">
+              <label for="recetaCode">Código</label>
+              <input id="recetaCode" type="text" pInputText [(ngModel)]="recetaForm.code"
+                placeholder="Ingrese el código" class="input-rounded" />
+            </div>
+          </div>
+          <!-- Tipo Componente -->
+          <div class="p-col-12 p-md-4 order-md-3">
+            <div class="form-group">
+              <label for="recetaTipo">Tipo Componente</label>
+              <p-dropdown [options]="tipos" [(ngModel)]="recetaForm.tipo" placeholder="Seleccionar Tipo"
+                (onChange)="onTipoChange($event)" styleClass="input-rounded">
+              </p-dropdown>
+            </div>
           </div>
         </div>
-        <!-- Código -->
-        <div class="p-col-12 p-md-4 order-md-2">
-          <div class="form-group">
-            <label for="recetaCode">Código</label>
-            <input id="recetaCode" type="text" pInputText [(ngModel)]="recetaForm.code" placeholder="Ingrese el código"
-              class="input-rounded" />
-          </div>
+
+
+        <!-- Imagen -->
+        <div class="form-group">
+          <label for="componenteImage">Imagen del Componente</label>
+          <p-fileupload name="imageFile" [auto]="false" [customUpload]="true" accept="image/*" maxFileSize="1000000"
+            (onSelect)="onFileSelected($event)" styleClass="custom-fileupload" [chooseLabel]="'Subir imagen'"
+            [showUploadButton]="false" [showCancelButton]="false">
+            <ng-template pTemplate="empty">
+              <div class="file-upload-empty">
+                Arrastra y suelta el archivo aquí o haz clic para seleccionar.
+              </div>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <div *ngIf="selectedImage">
+                <img [src]="selectedImage" alt="Vista previa" class="preview-img" />
+              </div>
+            </ng-template>
+          </p-fileupload>
         </div>
-        <!-- Tipo Componente -->
-        <div class="p-col-12 p-md-4 order-md-3">
-          <div class="form-group">
-            <label for="recetaTipo">Tipo Componente</label>
-            <p-dropdown [options]="tipos" [(ngModel)]="recetaForm.tipo" placeholder="Seleccionar Tipo"
-              (onChange)="onTipoChange($event)" styleClass="input-rounded">
-            </p-dropdown>
-          </div>
+        <!-- PickList y Tabla para selección de artículos (como antes) -->
+        <div class="picklist-section">
+          <p class="picklist-description">
+            Selecciona los insumos desde la lista izquierda. Los que agregues a la derecha formarán parte del
+            componente.
+          </p>
+          <p-pickList #pickList [source]="availableArticulos" [target]="selectedArticulos"
+            sourceHeader="Artículos Disponibles" targetHeader="Artículos Seleccionados" dragdrop="true"
+            [filterBy]="'name,code'" [showSourceFilter]="true" [showTargetFilter]="true">
+            <ng-template let-articulo pTemplate="item">
+              <div class="picklist-item">
+                <span class="item-name">{{ articulo.name }}</span>
+                <small class="item-code">({{ articulo.code }})</small>
+              </div>
+            </ng-template>
+          </p-pickList>
+        </div>
+        <div class="selected-items" *ngIf="selectedArticulos.length">
+          <h3 class="section-title">Detalles de Componentes</h3>
+          <p-table [value]="selectedArticulos" styleClass="table-ingredients">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Artículo</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+              </tr>
+            </ng-template>
+            <ng-template let-item pTemplate="body">
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>
+                  <input type="number" pInputText [(ngModel)]="item.quantity" placeholder="Cantidad"
+                    class="input-quantity" />
+                </td>
+                <td>
+                  <span>{{ item.unidad || 'N/A' }}</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+        <div class="receta-preview" *ngIf="recetaForm.name || recetaForm.code || selectedArticulos.length">
+          <p-card styleClass="card-preview">
+            <div class="preview-header">
+              <h2>{{ recetaForm.name || 'Nombre del Componente' }}</h2>
+              <span class="preview-code">{{ recetaForm.code || 'Código' }}</span>
+            </div>
+            <ul>
+              <li *ngFor="let item of selectedArticulos">
+                <i class="pi pi-check-circle"></i>
+                <span>{{ item.quantity || 0 }}</span>
+                de <strong>{{ item.name }}</strong>
+                <span class="unit">({{ item.unidad || 'Unidad' }})</span>
+              </li>
+            </ul>
+            <div *ngIf="selectedImage" class="preview-image-container">
+              <img [src]="selectedImage" alt="Imagen del componente" class="preview-img" />
+            </div>
+          </p-card>
+        </div>
+        <div class="form-actions">
+          <button pButton type="button" label="Guardar Componente" icon="pi pi-check" (click)="saveReceta()"></button>
+          <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-button-secondary"
+            (click)="resetForm()"></button>
         </div>
       </div>
+    </p-tabPanel>
 
-
-
-      <!-- Imagen -->
-      <div class="form-group">
-        <label for="componenteImage">Imagen del Componente</label>
-        <p-fileupload name="imageFile" [auto]="false" [customUpload]="true" accept="image/*" maxFileSize="1000000"
-          (onSelect)="onFileSelected($event)" styleClass="custom-fileupload" [chooseLabel]="'Subir imagen'"
-          [showUploadButton]="false" [showCancelButton]="false">
-          <ng-template pTemplate="empty">
-            <div class="file-upload-empty">
-              Arrastra y suelta el archivo aquí o haz clic para seleccionar.
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div *ngIf="selectedImage">
-              <img [src]="selectedImage" alt="Vista previa" class="preview-img" />
-            </div>
-          </ng-template>
-        </p-fileupload>
+    <p-tabPanel header="Listar Componentes" leftIcon="pi pi-list">
+      <!-- Modo: Listar Componentes -->
+      <div class="receta-list-toolbar p-grid p-align-center p-justify-end p-mb-2">
+        <div class="p-col-12 p-md-4">
+          <span class="p-input-icon-right">
+            <input #searchInputList type="text" pInputText placeholder="Buscar por nombre o código..."
+              (input)="onTableFilter(searchInputList.value)" class="input-rounded" />
+            <i class="pi pi-search"></i>
+          </span>
+        </div>
       </div>
-      <!-- PickList y Tabla para selección de artículos (como antes) -->
-      <div class="picklist-section">
-        <p-pickList 
-        #pickList 
-        [source]="availableArticulos" 
-        [target]="selectedArticulos" 
-        sourceHeader="Artículos Disponibles"
-          targetHeader="Artículos Seleccionados" 
-          dragdrop="true" 
-          [filterBy]="'name,code'" 
-          [showSourceFilter]="true"
-          [showTargetFilter]="true">
-          <ng-template let-articulo pTemplate="item">
-            <div class="picklist-item">
-              <span class="item-name">{{ articulo.name }}</span>
-              <small class="item-code">({{ articulo.code }})</small>
-            </div>
-          </ng-template>
-        </p-pickList>
-      </div>
-      <div class="selected-items" *ngIf="selectedArticulos.length">
-        <h3 class="section-title">Detalles de Componentes</h3>
-        <p-table [value]="selectedArticulos" styleClass="table-ingredients">
+      <div class="receta-list">
+        <p-table #dtList [value]="recetas" [paginator]="true" [rows]="15" [globalFilterFields]="['nombre','codigo']"
+          sortMode="multiple" responsiveLayout="scroll" showCurrentPageReport
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} componentes"
+          styleClass="table-recetas">
           <ng-template pTemplate="header">
             <tr>
-              <th>Artículo</th>
-              <th>Cantidad</th>
-              <th>Unidad</th>
+              <th pSortableColumn="nombre">
+                Nombre <p-sortIcon field="nombre"></p-sortIcon>
+              </th>
+              <th pSortableColumn="codigo">
+                Código <p-sortIcon field="codigo"></p-sortIcon>
+              </th>
+              <th pSortableColumn="tipo">
+                Tipo <p-sortIcon field="tipo"></p-sortIcon>
+              </th>
+              <th>Acciones</th>
             </tr>
           </ng-template>
-          <ng-template let-item pTemplate="body">
+          <ng-template let-receta pTemplate="body">
             <tr>
-              <td>{{ item.name }}</td>
+              <td>{{ receta.nombre }}</td>
+              <td>{{ receta.codigo }}</td>
+              <td>{{ receta.tipo || '—' }}</td>
               <td>
-                <input type="number" pInputText [(ngModel)]="item.quantity" placeholder="Cantidad"
-                  class="input-quantity" />
-              </td>
-              <td>
-                <span>{{ item.unidad || 'N/A' }}</span>
+                <button pButton icon="pi pi-eye" class="p-button-text" (click)="editReceta(receta)"
+                  title="Ver Componente"></button>
+                <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="confirmDelete(receta)"
+                  title="Eliminar Componente"></button>
               </td>
             </tr>
           </ng-template>
         </p-table>
       </div>
-      <div class="receta-preview" *ngIf="recetaForm.name || recetaForm.code || selectedArticulos.length">
-        <p-card styleClass="card-preview">
-          <div class="preview-header">
-            <h2>{{ recetaForm.name || 'Nombre del Componente' }}</h2>
-            <span class="preview-code">{{ recetaForm.code || 'Código' }}</span>
-          </div>
-          <ul>
-            <li *ngFor="let item of selectedArticulos">
-              <i class="pi pi-check-circle"></i>
-              <span>{{ item.quantity || 0 }}</span>
-              de <strong>{{ item.name }}</strong>
-              <span class="unit">({{ item.unidad || 'Unidad' }})</span>
-            </li>
-          </ul>
-          <div *ngIf="selectedImage" class="preview-image-container">
-            <img [src]="selectedImage" alt="Imagen del componente" class="preview-img" />
-          </div>
-        </p-card>
-      </div>
-      <div class="form-actions">
-        <button pButton type="button" label="Guardar Componente" icon="pi pi-check" (click)="saveReceta()"></button>
-        <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-button-secondary"
-          (click)="resetForm()"></button>
-      </div>
-    </p-card>
-  </div>
+    </p-tabPanel>
+  </p-tabView>
 
-  <!-- Modo: Listar Componentes -->
-  <div *ngIf="activeTab === 'list'" class="receta-list">
-    <p-card header="Listado de Componentes" styleClass="card-list">
-      <p-table [value]="recetas" styleClass="table-recetas">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Código</th>
-            <th>Tipo</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
-        <ng-template let-receta pTemplate="body">
-          <tr>
-            <td>
-              <img *ngIf="receta.imagen" [src]="receta.imagen" alt="{{ receta.nombre }}" class="thumbnail"
-                style="cursor: pointer;" />
-            </td>
-            <td>{{ receta.nombre }}</td>
-            <td>{{ receta.codigo }}</td>
-            <td>
-              <span>{{ receta.tipo || 'tipo no especificado' }}</span>
-            </td>
-            <td>
-              <!-- Botón "Ver" abre el diálogo en modo de solo lectura -->
-              <button pButton icon="pi pi-eye" class="p-button-text" (click)="editReceta(receta)"
-                title="Ver Componente"></button>
-              <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="deleteReceta(receta)"
-                title="Eliminar Componente"></button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-card>
-  </div>
-
-  <!-- Diálogo para ver / editar Componente -->
+  <!-- Dialog y modals se mantienen fuera del TabView para no recargarse al cambiar de pestaña -->
   <p-dialog header="Detalle del Componente" [(visible)]="displayEditDialog" modal="true" [closable]="true"
-    [style]="{ width: '800px', borderRadius: '1rem' }" styleClass="modern-dialog rounded-dialog">
+    [style]="{ width: '920px', borderRadius: '1rem' }" styleClass="modern-dialog rounded-dialog">
     <ng-container *ngIf="editingReceta">
       <!-- Modo de solo lectura: Información presentada como tabla -->
       <div class="dialog-form" *ngIf="!dialogEditMode">
@@ -188,13 +191,15 @@
             <th>Tipo de componente</th>
             <td>{{ recetaForm.tipo || 'No definido' }}</td>
           </tr>
-          <tr *ngIf="selectedImage">
-            <th>Imagen</th>
-            <td>
-              <img [src]="selectedImage" alt="Imagen del componente" class="detail-img" />
-            </td>
-          </tr>
         </table>
+
+        <div *ngIf="selectedImage" class="preview-image-container">
+          <label><i class="pi pi-image"></i> Imagen del Componente</label>
+          <p-image [src]="selectedImage" alt="Imagen del componente" alt="Image" width="250" [preview]="true" />
+        </div>
+
+
+        
         <div *ngIf="selectedArticulos.length">
           <h3>Materiales</h3>
           <table class="materials-table">
@@ -239,6 +244,20 @@
           <input id="editRecetaTipo" type="text" pInputText [(ngModel)]="recetaForm.tipo" placeholder="Ingrese el Tipo"
             class="input-rounded" />
         </div>
+
+        <div class="form-group">
+          <label for="editRecetaImage">
+            <i class="pi pi-image"></i> Imagen del Componente
+          </label>
+          <p-fileUpload name="imagen" customUpload="true" [auto]="true" accept="image/*"
+            (uploadHandler)="onFileSelected($event)" chooseLabel="Seleccionar Imagen" class="image-upload-button">
+          </p-fileUpload>
+
+          <div *ngIf="selectedImage" class="preview-image-container">
+            <img [src]="selectedImage" alt="Vista previa" class="preview-img" />
+          </div>
+        </div>
+
         <div class="picklist-section">
           <p-pickList [source]="availableArticulos" [target]="selectedArticulos" sourceHeader="Artículos Disponibles"
             targetHeader="Artículos Seleccionados" dragdrop="true" [filterBy]="'name,code'" [showSourceFilter]="true"
@@ -279,46 +298,48 @@
 
       <!-- Footer del diálogo -->
       <p-footer>
-        <!-- Botón "Editar" se muestra en modo lectura -->
-        <button pButton type="button" label="Editar" icon="pi pi-pencil" *ngIf="!dialogEditMode"
-          (click)="enableDialogEdit()" class="p-button-rounded p-button-info"></button>
-        <!-- Botón "Actualizar Componente" se muestra en modo edición -->
-        <button pButton type="button" label="Actualizar Componente" icon="pi pi-check" *ngIf="dialogEditMode"
-          (click)="confirmUpdate()" class="p-button-rounded p-button-success"></button>
-        <button pButton type="button" label="Cerrar" icon="pi pi-times" class="p-button-rounded p-button-secondary"
-          (click)="cancelEdit()"></button>
+
+        <div class="form-actions">
+          <!-- Botón "Editar" se muestra en modo lectura -->
+          <button pButton type="button" label="Editar" icon="pi pi-pencil" *ngIf="!dialogEditMode"
+            (click)="enableDialogEdit()"></button>
+          <!-- Botón "Actualizar Componente" se muestra en modo edición -->
+          <button pButton type="button" label="Actualizar Componente" icon="pi pi-check" *ngIf="dialogEditMode"
+            (click)="confirmUpdate()"></button>
+          <button pButton type="button" label="Cerrar" icon="pi pi-times" class="p-button-secondary"
+            (click)="cancelEdit()"></button>
+        </div>
+
       </p-footer>
     </ng-container>
   </p-dialog>
 
-</div>
-
-
-<!-- Modal para ingresar nuevo tipo -->
-<!-- Modal para ingresar nuevo tipo -->
-<p-dialog header="Agregar Nuevo Tipo" [(visible)]="showNewTipoDialog" [modal]="true" [closable]="true"
-  (onHide)="onDialogHide()" [style]="{width: '300px'}">
-  <div class="p-fluid">
-    <div class="p-field p-mb-3">
-      <label for="newTipo" class="labelTipo">Tipo: </label>
-      <!-- Se agrega (keyup) para detectar cambios y obtener sugerencias -->
-      <input id="newTipo" type="text" pInputText [(ngModel)]="newTipo" (keyup)="onTipoInputChange()" />
+  <p-dialog header="Agregar Nuevo Tipo" [(visible)]="showNewTipoDialog" [modal]="true" [closable]="true"
+    (onHide)="onDialogHide()" [style]="{width: '300px'}">
+    <div class="p-fluid">
+      <div class="p-field p-mb-3">
+        <label for="newTipo" class="labelTipo">Tipo: </label>
+        <!-- Se agrega (keyup) para detectar cambios y obtener sugerencias -->
+        <input id="newTipo" type="text" pInputText [(ngModel)]="newTipo" (keyup)="onTipoInputChange()" />
+      </div>
+      <!-- Bloque para mostrar sugerencias si existen -->
+      <div class="p-field" *ngIf="suggestions && suggestions.length">
+        <p>¿Quisiste decir?</p>
+        <ul>
+          <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)" style="cursor:pointer">
+            {{ suggestion }}
+          </li>
+        </ul>
+      </div>
     </div>
-    <!-- Bloque para mostrar sugerencias si existen -->
-    <div class="p-field" *ngIf="suggestions && suggestions.length">
-      <p>¿Quisiste decir?</p>
-      <ul>
-        <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)" style="cursor:pointer">
-          {{ suggestion }}
-        </li>
-      </ul>
-    </div>
-  </div>
-  <ng-template pTemplate="footer">
-    <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-mr-2" (click)="cancelNewTipo()"></button>
-    <button pButton type="button" label="Agregar" icon="pi pi-check" (click)="acceptNewTipo()"></button>
-  </ng-template>
-</p-dialog>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-mr-2"
+        (click)="cancelNewTipo()"></button>
+      <button pButton type="button" label="Agregar" icon="pi pi-check" (click)="acceptNewTipo()"></button>
+    </ng-template>
+  </p-dialog>
 
-<p-toast></p-toast>
-<p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+</p-card>

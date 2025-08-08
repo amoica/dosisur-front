@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Articulo, ArticuloServiceService } from '../service/articulo-service.service';
 import { Receta, RecetaArticulo, RecetaService } from '../service/receta.service';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -17,8 +17,10 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
 import { PickListModule } from 'primeng/picklist';
 import { FileUpload } from 'primeng/fileupload';
-import { Select, SelectModule} from 'primeng/select';
+import { Select, SelectModule } from 'primeng/select';
 import { SpellCheckService } from '../../core/service/spell-check.service';
+import { TabViewModule } from 'primeng/tabview';
+import { ImageModule } from 'primeng/image';
 
 @Component({
   selector: 'app-receta',
@@ -40,7 +42,9 @@ import { SpellCheckService } from '../../core/service/spell-check.service';
     TextareaModule,
     PickListModule,
     FileUpload,
-    SelectModule
+    SelectModule,
+    TabViewModule,
+    ImageModule
   ],
   templateUrl: './receta.component.html',
   styleUrls: ['./receta.component.scss'],
@@ -55,6 +59,8 @@ export class RecetaComponent implements OnInit {
   recetas: any[] = [];
   selectedImage: string | null = null;
   selectedFile: File | null = null;
+  activeIndex = 0;
+  @ViewChild('dtList') dtList!: Table;
 
 
   // Variables de edición
@@ -67,7 +73,7 @@ export class RecetaComponent implements OnInit {
 
   suggestions: string[] = [];
 
-
+  totalRecords: number = 0;
 
   tipos: any[] = [];
 
@@ -77,12 +83,12 @@ export class RecetaComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private spellCheckService: SpellCheckService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.fetchArticulos();
     this.fetchRecetas();
-    
+
   }
 
   fetchArticulos(): void {
@@ -105,9 +111,14 @@ export class RecetaComponent implements OnInit {
     });
   }
 
+  onTableFilter(value: string) {
+    this.dtList.filterGlobal(value, 'contains');
+  }
+
   fetchRecetas(): void {
     this.recetaService.getRecetas().subscribe({
       next: (data: any) => {
+        console.log(data);
         this.recetas = data.data || data;
         // Extrae los valores de tipo de cada receta que no sean null.
         this.tipos = Array.from(new Set(
@@ -144,15 +155,15 @@ export class RecetaComponent implements OnInit {
     this.suggestions = [];
   }
 
- 
+
   acceptNewTipo(): void {
     const trimmedTipo = this.newTipo.trim().toLowerCase();
     if (!trimmedTipo) {
       return; // No hace nada si el input está vacío
     }
-    
+
     const { valid, suggestions } = this.spellCheckService.checkWord(trimmedTipo);
-    
+
     // Si la palabra no es válida y existen sugerencias, muestra el diálogo de confirmación
     if (!valid && suggestions && suggestions.length) {
       // Utilizamos el diálogo de confirmación para darle al usuario la opción de aceptar la palabra tal como está,
@@ -219,19 +230,19 @@ export class RecetaComponent implements OnInit {
       });
       return;
     }
-  
+
     const formData = new FormData();
     formData.append('nombre', this.recetaForm.name);
     formData.append('codigo', this.recetaForm.code);
     if (this.recetaForm.tipo) formData.append('tipo', this.recetaForm.tipo);
     if (this.selectedFile) formData.append('imagen', this.selectedFile); // Aquí se sube la imagen
-  
+
     const componentes = this.selectedArticulos.map(item => ({
       insumoId: item.id,
       cantidad: item.quantity,
     }));
     formData.append('componentes', JSON.stringify(componentes));
-  
+
     this.recetaService.createReceta(formData).subscribe({
       next: (response: any) => {
         this.recetas.push(response.data || response);
@@ -241,6 +252,8 @@ export class RecetaComponent implements OnInit {
           detail: 'Componente creado exitosamente.',
         });
         this.resetForm();
+        this.fetchRecetas();
+
         this.activeTab = 'list';
       },
       error: () => {
@@ -314,10 +327,12 @@ export class RecetaComponent implements OnInit {
   editReceta(receta: any): void {
     this.editingReceta = { ...receta };
     this.recetaForm = { name: receta.nombre, code: receta.codigo, tipo: receta.tipo };
-    this.selectedArticulos = receta.componentes.map((comp:any) => ({
+    this.selectedArticulos = receta.componentes.map((comp: any) => ({
       ...comp.insumo,
       quantity: comp.cantidad
     }));
+    this.selectedImage = receta.imagen || null; // Asegurate que venga del backend
+    this.selectedFile = null;
     this.displayEditDialog = true;
     this.dialogEditMode = false;
   }
@@ -340,19 +355,21 @@ export class RecetaComponent implements OnInit {
   updateReceta(): void {
     if (!this.editingReceta) return;
 
-    const updatedComponente = {
-      id: this.editingReceta.id,
-      nombre: this.recetaForm.name,
-      codigo: this.recetaForm.code,
-      componentes: this.selectedArticulos.map(item => ({
-        insumoId: item.id,
-        cantidad: item.quantity,
-      })),
-    };
+    const formData = new FormData();
+    formData.append('nombre', this.recetaForm.name);
+    formData.append('codigo', this.recetaForm.code);
+    if (this.recetaForm.tipo) formData.append('tipo', this.recetaForm.tipo);
+    if (this.selectedFile) formData.append('imagen', this.selectedFile); // Imagen nueva
 
-    this.recetaService.updateReceta(updatedComponente).subscribe({
+    const componentes = this.selectedArticulos.map(item => ({
+      insumoId: item.id,
+      cantidad: item.quantity,
+    }));
+    formData.append('componentes', JSON.stringify(componentes));
+
+    this.recetaService.updateReceta(this.editingReceta.id, formData).subscribe({
       next: (response: any) => {
-        const index = this.recetas.findIndex(r => r.id === updatedComponente.id);
+        const index = this.recetas.findIndex(r => r.id === this.editingReceta.id);
         if (index !== -1) {
           this.recetas[index] = response.data || response;
         }

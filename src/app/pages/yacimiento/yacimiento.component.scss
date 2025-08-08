@@ -1,0 +1,190 @@
+/* yacimiento.component.scss */
+
+/* Variables */
+$page-title-color: var(--primary-color);
+$description-color: var(--text-secondary-color);
+$border-radius: 0.5rem;
+
+/* Título y descripción */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: $page-title-color;
+}
+
+.page-description {
+  font-size: 1rem;
+  color: $description-color;
+  margin-bottom: 1.5rem;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  input {
+    border: 1px solid var(--surface-border);
+    border-radius: $border-radius;
+    padding: 0.5rem 0.75rem;
+    transition: border-color .2s, box-shadow .2s;
+
+    &:hover {
+      border-color: $page-title-color;
+    }
+    &:focus {
+      outline: none;
+      border-color: $page-title-color;
+      box-shadow: 0 0 0 .25rem rgba(59,132,246,.25);
+    }
+  }
+
+  .p-button {
+    border-radius: $border-radius;
+  }
+}
+
+/* Card principal */
+
+
+/* Tabla: cabecera y filas alternadas */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  //background-color: #f3f4f6;
+  font-weight: 500;
+}
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Modal/dialog */
+.p-dialog .p-dialog-content {
+  padding: 0 !important;
+}
+
+.modal-section {
+  padding: 2rem 3rem;
+  margin: 0 auto 2rem;
+  width: 80%;
+}
+
+.decorative-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+
+  i {
+    font-size: 2.5rem;
+    color: $page-title-color;
+    margin-right: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    margin: 0;
+    color: $page-title-color;
+  }
+}
+
+.form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .p-field {
+    flex: 1 1 calc(25% - 1rem);
+    min-width: 200px;
+    margin-bottom: 1rem;
+
+    label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+
+    .p-input-icon-left,
+    p-dropdown {
+      width: 100%;
+
+      input,
+      .p-dropdown-label {
+        height: 2.5rem;
+        padding-left: 2.5rem;
+      }
+
+      .pi {
+        left: 0.75rem !important;
+      }
+    }
+
+    small.p-error {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--danger-color);
+    }
+  }
+}
+
+.required {
+  color: var(--danger-color);
+}
+
+/* Footer del diálogo */
+.p-dialog footer {
+  background: #f9fafb;
+  padding: 1rem 3rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  .p-button {
+    min-width: 5rem;
+  }
+}
+
+/* Inputs con icono extra */
+.p-input-icon-left {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .pi {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--primary-color);
+  }
+
+  input,
+  textarea {
+    padding-left: 2.5rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .toolbar,
+  .form-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-grid .p-field {
+    flex: 1 1 100%;
+  }
+}

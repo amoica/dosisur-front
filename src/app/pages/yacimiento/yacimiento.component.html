@@ -1,0 +1,165 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-card>
+  <div class="p-grid">
+    <div class="p-col-12">
+      <h1 class="page-title">Gestión de Yacimientos</h1>
+      <p class="page-description">
+        Administra y gestiona los yacimientos asociados a tus clientes.
+      </p>
+    </div>
+
+    <div class="p-col-12 toolbar">
+      <div class="search-wrapper">
+        <input
+          #searchInput
+          type="text"
+          pInputText
+          placeholder="Buscar yacimientos..."
+          (input)="dt.filterGlobal(searchInput.value,'contains')" />
+        <button
+          pButton
+          type="button"
+          icon="pi pi-search"
+          class="p-button-outlined">
+        </button>
+      </div>
+      <button
+        pButton
+        label="Nuevo"
+        icon="pi pi-plus"
+        class="p-button-primary"
+        (click)="openNew()">
+      </button>
+    </div>
+  </div>
+
+  <p-table
+    #dt
+    [value]="yacimientos"
+    [paginator]="true"
+    [rows]="15"
+    [globalFilterFields]="['nombre','ubicacion','cliente.nombre']"
+    sortMode="multiple"
+    responsiveLayout="scroll"
+    showCurrentPageReport
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} yacimientos">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nombre">
+          Nombre<p-sortIcon field="nombre"></p-sortIcon>
+        </th>
+        <th pSortableColumn="ubicacion">
+          Ubicación<p-sortIcon field="ubicacion"></p-sortIcon>
+        </th>
+        <th pSortableColumn="cliente.nombre">
+          Cliente<p-sortIcon field="cliente.nombre"></p-sortIcon>
+        </th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-y>
+      <tr>
+        <td>{{ y.nombre }}</td>
+        <td>{{ y.ubicacion }}</td>
+        <td>{{ y.cliente?.nombre }}</td>
+        <td>
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-text p-button-rounded mr-1 mb-1"
+            tooltip="Editar"
+            (click)="openEdit(y)">
+          </button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-text p-button-rounded p-button-danger"
+            tooltip="Eliminar"
+            (click)="delete(y)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [responsive]="true"
+  [style]="{ width: '60vw', 'max-width': '95vw' }">
+  
+  <div class="modal-section">
+    <div class="decorative-section">
+      <i class="pi pi-map-marker"></i>
+      <h2>{{ isEdit ? 'Editar Yacimiento' : 'Nuevo Yacimiento' }}</h2>
+    </div>
+
+    <div class="form-grid">
+      <!-- Nombre -->
+      <div class="p-field">
+        <label for="nombre">Nombre <span class="required">*</span></label>
+        <div class="p-input-icon-left">
+          <i class="pi pi-map-marker"></i>
+          <input
+            id="nombre"
+            type="text"
+            pInputText
+            [(ngModel)]="formData.nombre"
+            [ngClass]="{'p-invalid': submitted && !formData.nombre}"
+            (focus)="submitted = true" />
+        </div>
+        <small *ngIf="submitted && !formData.nombre" class="p-error">Obligatorio</small>
+      </div>
+
+      <!-- Ubicación -->
+      <div class="p-field">
+        <label for="ubicacion">Ubicación</label>
+        <div class="p-input-icon-left">
+          <i class="pi pi-globe"></i>
+          <input
+            id="ubicacion"
+            type="text"
+            pInputText
+            [(ngModel)]="formData.ubicacion" />
+        </div>
+      </div>
+
+      <!-- Cliente -->
+      <div class="p-field">
+        <label for="cliente">Cliente <span class="required">*</span></label>
+        <p-dropdown
+          inputId="cliente"
+          [options]="clientes"
+          optionLabel="nombre"
+          optionValue="id"
+          [(ngModel)]="formData.clienteId"
+          placeholder="Seleccionar cliente"
+          [ngClass]="{'p-invalid': submitted && !formData.clienteId}"
+          (onShow)="submitted = true">
+        </p-dropdown>
+        <small *ngIf="submitted && !formData.clienteId" class="p-error">Obligatorio</small>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      label="Cancelar"
+      class="p-button-secondary"
+      (click)="hideDialog()">
+    </button>
+    <button
+      pButton
+      label="Guardar"
+      class="p-button-success"
+      (click)="save()"
+      [disabled]="!formData.nombre || !formData.clienteId">
+    </button>
+  </ng-template>
+</p-dialog>

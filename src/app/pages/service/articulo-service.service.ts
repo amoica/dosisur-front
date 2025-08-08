@@ -14,7 +14,7 @@ export interface Articulo {
   sinonimo?: string;
   updateAt?: Date;
   createdAt?: Date;
-  categoria?:string | null;
+  categoria?: string | null;
   // … otros campos si los necesitas
   insumoProveedor?: Array<{
     proveedorId: number;
@@ -51,7 +51,7 @@ export class ArticuloServiceService {
     }
   }
 
-  getAllArticuleNotFilters(){
+  getAllArticuleNotFilters() {
     return this.http.get(`${this.apiUrl}/notfilters`);
   }
 
@@ -71,6 +71,12 @@ export class ArticuloServiceService {
 
   deleteArticulo(id: number) {
     return this.http.delete(this.apiUrl + '/' + id);
+  }
+
+  getInsumos(params: { tipoInsumo: string; categoria?: string }) {
+    const { tipoInsumo, categoria } = params;
+    const query = new URLSearchParams({ tipoInsumo, ...(categoria ? { categoria } : {}) });
+    return this.http.get<any[]>(`${this.apiUrl}/buscar/?${query.toString()}`);
   }
 
   toggleDisponibilidad() {

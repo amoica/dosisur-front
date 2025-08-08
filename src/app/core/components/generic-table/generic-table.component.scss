@@ -1,0 +1,58 @@
+.page-card {
+  padding: 1.5rem;
+  border: none;
+  box-shadow: none;
+}
+
+.header-grid {
+  margin-bottom: 1rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.page-description {
+  color: var(--text-secondary-color);
+  margin-top: 0.25rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 0.5rem;
+
+  .search-input {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .search-input:focus {
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+  }
+}
+
+.new-button {
+  white-space: nowrap;
+}
+
+.minimal-table {
+  :host ::ng-deep .p-datatable thead th {
+    background: transparent;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  :host ::ng-deep .p-datatable tbody tr:hover {
+    background: #f9f9f9;
+  }
+  .text-center {
+    text-align: center;
+  }
+}

@@ -12,9 +12,9 @@ export interface Receta {
     insumoId: number;
     cantidad: number;
     insumo?: {
-      name:string;
-      code:string;
-      unidad:number
+      name: string;
+      code: string;
+      unidad: number
     };
   }>
 }
@@ -35,8 +35,8 @@ export class RecetaService {
   constructor(private http: HttpClient) { }
 
   // Obtiene el listado de recetas
-  getRecetas(): Observable<Receta[]> {
-    return this.http.get<Receta[]>(this.apiUrl);
+  getRecetas(): Observable<{ data: Receta[] }> {
+    return this.http.get<{ data: Receta[] }>(this.apiUrl);
   }
 
   // Obtiene una receta por su id
@@ -56,10 +56,12 @@ export class RecetaService {
   }
 
   // Actualiza una receta existente
-  updateReceta(receta: Receta): Observable<Receta> {
-    const {id, ...updateReceta} = receta; 
-    
-    return this.http.patch<Receta>(`${this.apiUrl}/${id}`, updateReceta);
+  updateReceta(id: string, receta: FormData): Observable<Receta> {
+    console.log(`🚀 Enviando FormData para receta ${id}:`);
+    for (const [key, value] of receta.entries()) {
+      console.log(`   • ${key}:`, value);
+    }
+    return this.http.patch<Receta>(`${this.apiUrl}/${id}`, receta);
   }
 
   // Elimina una receta

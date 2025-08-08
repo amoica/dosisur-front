@@ -1,0 +1,165 @@
+/* Contenedor general */
+.page-card {
+  padding: 1.5rem;
+  border: none;
+  box-shadow: none;
+}
+
+/* Header */
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+}
+.page-description {
+  font-size: 1rem;
+  color: var(--text-secondary-color);
+  margin: 0.25rem 0 1rem;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  .search-wrapper {
+    display: flex;
+    gap: 0.5rem;
+
+    .search-input {
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      width: 200px;
+    }
+    .search-button {
+      border-radius: 0.5rem;
+    }
+  }
+}
+
+/* Tabla */
+.minimal-table {
+  :host ::ng-deep .p-datatable thead th {
+    background: transparent;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  :host ::ng-deep .p-datatable tbody tr:hover {
+    background: #f9f9f9;
+  }
+  .text-center {
+    text-align: center;
+  }
+}
+
+/* Diálogo Crear/Editar */
+:host ::ng-deep .custom-dialog.role-dialog.p-dialog {
+  width: 65vw !important;
+  max-width: 850px !important;
+  top: 2rem !important;
+}
+
+/* Decorative header */
+.decorative-section {
+  text-align: center;
+  margin-bottom: 1rem;
+
+  i {
+    font-size: 3rem;
+    color: var(--primary-color);
+  }
+  h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.75rem;
+    color: var(--primary-color);
+  }
+}
+
+/* Form grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+/* Estilos de campo */
+.p-field {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  input,
+  textarea {
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Full width */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Checkbox alineado */
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* PickList */
+:host ::ng-deep .p-picklist .p-picklist-header {
+  background: #f5f5f5;
+  font-weight: 500;
+}
+.pick-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+/* Footer con botones */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  border-top: 1px solid #e0e0e0;
+  padding: 1rem 0 0;
+}
+
+/* Diálogo Ver Permisos */
+:host ::ng-deep .custom-dialog.view-dialog.p-dialog {
+  width: 30vw !important;
+  max-width: 400px !important;
+  top: 3rem !important;
+}
+.permissions-list {
+  list-style: none;
+  padding: 0.5rem 1rem 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+
+    .text-success {
+      color: #28a745;
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+/* Required asterisco */
+.required {
+  color: var(--danger-color);
+}
