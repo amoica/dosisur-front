@@ -25,6 +25,8 @@ export const appRoutes: Routes = [
             { path: 'gestion-usuarios', loadChildren: () => import('./app/pages/user/user.route') },
             { path: 'gestion-roles-permisos', loadChildren: () => import('./app/pages/roles/roles.route') },
             { path: 'gestion-yacimientos', loadChildren: () => import('./app/pages/yacimiento/yacimiento.route') },
+            { path: 'gestion-reportes', loadChildren: () => import('./app/pages/reporte/reporte.route')},
+
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]

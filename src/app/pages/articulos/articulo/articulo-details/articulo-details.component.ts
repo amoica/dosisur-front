@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Articulo, ArticuloServiceService } from '../../../service/articulo-service.service';
+import { ArticuloServiceService } from '../../../service/articulo-service.service';
 import { CommonModule, Location } from '@angular/common';
 import { TabViewModule } from 'primeng/tabview';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
+import { Articulo } from '../../../../core/model/articulo.model';
 
 @Component({
   selector: 'app-articulo-details',

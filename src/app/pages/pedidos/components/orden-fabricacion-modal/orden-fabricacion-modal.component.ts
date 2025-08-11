@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -24,11 +24,12 @@ import { YacimientoService } from '../../../service/yacimiento.service';
 import { Yacimiento } from '../../../yacimiento/yacimiento.interface';
 import { ArticuloServiceService } from '../../../service/articulo-service.service';
 import { InputNumberModule } from 'primeng/inputnumber';
-
-
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-orden-fabricacion-modal',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DialogModule,
     StepsModule,
@@ -48,69 +49,76 @@ import { InputNumberModule } from 'primeng/inputnumber';
     RadioButton,
     InputNumberModule
   ],
-  standalone: true,
   templateUrl: './orden-fabricacion-modal.component.html',
   styleUrl: './orden-fabricacion-modal.component.scss'
 })
 export class OrdenFabricacionModalComponent implements OnInit {
 
   @Output() closeModal = new EventEmitter<void>();
-  display: boolean = true;
-  activeIndex: number = 0;
+
+  display = true;
+  activeIndex = 0;
   steps: any[] = [];
   formOrden: FormGroup;
+  loading = false;
 
-  // Opciones para los dropdowns (deben llenarse a partir de tus servicios)
-  clientesOptions: any[] = [];
-  prioridadOptions: any[] = [
+  // Catálogos
+  clientes: Cliente[] = [];
+  clientesOptions: Array<{ label: string; value: number | null }> = [];
+  contactosOptions: Array<{ label: string; value: number | null }> = [];
+  yacimientoOptions: Array<{ label: string; value: number | null }> = [];
+
+  prioridadOptions = [
     { label: 'BAJA', value: 'BAJA' },
     { label: 'MEDIA', value: 'MEDIA' },
     { label: 'ALTA', value: 'ALTA' }
   ];
-  contactosOptions: any[] = []; // Datos de contactos (deben llenarse a partir de tus servicios)
-  skidOptions: any[] = [
+
+  skidOptions = [
     { name: 'SOLAR', code: 'SOLAR' },
     { name: 'NEUMATICO', code: 'NEUMATICO' },
     { name: 'ELECTRICO', code: 'ELECTRICO' },
     { name: 'RESERVA', code: 'RESERVA' }
-  ]; // Ej: [{ label: 'Skid Solar - 100lts', value: 'skid1' }, ... ]
-  tableroOptions: any[] = []; // Datos de tableros
-  instrumentoOptions: any[] = []; // Datos de instrumentos
-  clientes: Cliente[] = [];
-  skids: any[] = [];
+  ];
 
-  baterias: any[] = [
+  skids: Array<{ label: string; value: number }> = [];
+
+  baterias = [
     { name: '1', code: '1' },
     { name: '2', code: '2' },
     { name: '3', code: '3' },
     { name: '4', code: '4' },
     { name: 'No aplica', code: 'No aplica' }
-  ]
+  ];
 
-  tanque: any[] = [
+  tanque = [
     { name: 'SI', key: true },
     { name: 'NO', key: false },
-  ]
+  ];
 
-  calibracion: any[] = [
+  calibracion = [
     { name: 'SI', key: true },
     { name: 'NO', key: false },
-  ]
-  today: Date = new Date();
-  yacimientoOptions: { label: string; value: number }[] = [];  // <- nuevas opciones
+  ];
 
   panelOptions: Array<{ name: string; id: number }> = [];
   bombaOptions: Array<{ name: string; id: number }> = [];
+
+  tableroOptions: Array<{ id: number; name: string; codeText?: string }> = [];
+  instrumentoOptions: Array<{ id: number; name: string; codeText?: string }> = [];
+
   showPaneles = false;
+  today: Date = new Date();
 
   constructor(
     private fb: FormBuilder,
     private clienteService: ClienteService,
     private skidService: ProductoFabricadoService,
-    private componentService: RecetaService,
+    private recetaService: RecetaService,
     private ordenService: OrdenFabricacionService,
     private yacService: YacimientoService,
-    private insumoService: ArticuloServiceService) {
+    private insumoService: ArticuloServiceService
+  ) {
 
     this.steps = [
       { label: 'Información General' },
@@ -118,70 +126,103 @@ export class OrdenFabricacionModalComponent implements OnInit {
       { label: 'Resumen' }
     ];
 
-
     this.formOrden = this.fb.group({
-      // Datos generales
-      codigo: ["", Validators.required],
+      // Paso 1
+      codigo: ['', Validators.required],
       cliente: [null, Validators.required],
-      prioridad: ["", Validators.required],
-      fechaEntrega: ["", Validators.required],
+      prioridad: ['', Validators.required],
+      fechaEntrega: ['', Validators.required],
       contacto: [{ value: null, disabled: true }, Validators.required],
-      nroOC: ["", Validators.required],
+      nroOC: ['', Validators.required],
       yacimiento: [{ value: null, disabled: true }, Validators.required],
-      observaciones: [""],
-      pto: [""],
-      // Los datos de fileUpload se gestionan en onFileSelect
-      // Datos del skid (Paso 2)
-      cantidadSkid: [1, Validators.required],
+      observaciones: [''],
+      pto: [''],
+
+      // Paso 2
+      cantidadSkid: [1, [Validators.required, Validators.min(1)]],
       tipoSkid: [null, Validators.required],
       skid: [{ value: null, disabled: true }, Validators.required],
+
       paneles: this.fb.array([
         this.fb.group({
-          modelo: [null, Validators.required],   // code o id del panel
-          cantidad: [1, [Validators.required, Validators.min(1)]],
-        })
-      ]), baterias: [{ value: 'No aplica', disabled: true }],
-      bombasDet: this.fb.array([
-        this.fb.group({
-          modelo: [null, Validators.required],   // code o id de la bomba
+          modelo: [null, Validators.required], // id del panel
           cantidad: [1, [Validators.required, Validators.min(1)]],
         })
       ]),
-      psv: [""],
+      baterias: [{ value: 'No aplica', disabled: true }],
+
+      bombasDet: this.fb.array([
+        this.fb.group({
+          modelo: [null, Validators.required], // id de la bomba
+          cantidad: [1, [Validators.required, Validators.min(1)]],
+        })
+      ]),
+
+      psv: [''],
       tanque: [false, Validators.required],
       calibracion: [false, Validators.required],
-      tableros: [""],
-      instrumentos: [""]
-    });
 
-    // Cargar las opciones de clientes, skid, bombas, tableros, etc., desde tus servicios
-    // Ejemplo:
-    // this.clienteService.getClientesOptions().subscribe(options => this.clientesOptions = options);
+      tableros: [[]],      // number[]
+      instrumentos: [[]],  // number[]
+    });
   }
 
-  ngOnInit() {
+  // ---- getters de FormArray
+  get panelesFA(): FormArray { return this.formOrden.get('paneles') as FormArray; }
+  get bombasFA(): FormArray { return this.formOrden.get('bombasDet') as FormArray; }
 
-    this.loadData();
-    this.cargarCompnentes();
+  ngOnInit(): void {
+    this.loadClientes();
+    this.loadRecetas();
+    this.loadPaneles();
 
-    this.insumoService.getInsumos({ tipoInsumo: 'panel' })
-      .subscribe(list => this.panelOptions = list); // list ya trae {name, id}
+    // Bombas por tipo de skid
+    this.formOrden.get('tipoSkid')?.valueChanges.subscribe((tipoSkid) => {
+      // Mostrar/ocultar paneles
+      this.showPaneles = tipoSkid === 'SOLAR';
+      if (!this.showPaneles) {
+        // Limpieza agresiva
+        while (this.panelesFA.length > 1) this.panelesFA.removeAt(this.panelesFA.length - 1);
+        this.panelesFA.at(0).patchValue({ modelo: null, cantidad: 1 });
+        this.formOrden.get('baterias')?.setValue('No aplica');
+        this.formOrden.get('baterias')?.disable();
+      } else {
+        this.formOrden.get('baterias')?.enable();
+      }
 
+      // Bombas
+      if (tipoSkid) {
+        this.insumoService.getInsumos({ tipoInsumo: 'bomba', categoria: tipoSkid })
+          .subscribe((list: Array<{ name: string; id: number }>) => this.bombaOptions = list);
+      } else {
+        this.bombaOptions = [];
+      }
 
+      // Skids por tipo
+      if (tipoSkid) {
+        this.skidService.getSkidByTipo(tipoSkid).subscribe((data: any) => {
+          this.skids = data.map((skid: any) => ({ label: `${skid.nombre}, lts: ${skid.lts}`, value: skid.id }));
+          this.formOrden.get('skid')?.enable();
+        });
+      } else {
+        this.skids = [];
+        this.formOrden.get('skid')?.setValue(null);
+        this.formOrden.get('skid')?.disable();
+      }
+    });
+
+    // Contactos + Yacimientos por cliente
     this.formOrden.get('cliente')!.valueChanges.subscribe(clienteId => {
       if (clienteId) {
-        // 1) habilita contacto (como ya tenías)
         const contactos = this.clientes.find(c => c.id === clienteId)?.contactos || [];
-        this.contactosOptions = contactos.map(ct => ({ label: ct.nombre, value: ct.id }));
+        this.contactosOptions = contactos.map(ct => ({ label: ct.nombre, value: ct.id ?? null }));
         this.formOrden.get('contacto')!.enable();
 
-        // 2) pide al backend los yacimientos
         this.yacService.findByCliente(clienteId).subscribe((list: Yacimiento[]) => {
           this.yacimientoOptions = list.map(y => ({ label: y.nombre!, value: y.id! }));
           this.formOrden.get('yacimiento')!.enable();
         });
       } else {
-        // si quita la selección, limpiamos y deshabilitamos
         this.formOrden.get('contacto')!.reset();
         this.formOrden.get('contacto')!.disable();
         this.formOrden.get('yacimiento')!.reset();
@@ -189,94 +230,44 @@ export class OrdenFabricacionModalComponent implements OnInit {
         this.yacimientoOptions = [];
       }
     });
-
-    this.formOrden.get('tipoSkid')?.valueChanges.subscribe((tipoSkid) => {
-      if (tipoSkid) {
-        this.insumoService.getInsumos({ tipoInsumo: 'bomba', categoria: tipoSkid })
-          .subscribe(list => this.bombaOptions = list); // {name, id}
-      } else {
-        this.bombaOptions = [];
-      }
-    });
-
-    // UNIFICADO: controlar paneles + cargar bombas + cargar skids + habilitar campos
-    this.formOrden.get('tipoSkid')?.valueChanges.subscribe((tipoSkid) => {
-      // Mostrar paneles solo si es SOLAR
-      this.showPaneles = tipoSkid === 'SOLAR';
-      if (!this.showPaneles) {
-        while (this.panelesFA.length > 1) this.panelesFA.removeAt(this.panelesFA.length - 1);
-        this.panelesFA.at(0).patchValue({ modelo: null, cantidad: 1 });
-      }
-
-      // Bombas por categoría
-      if (tipoSkid) {
-        this.insumoService.getInsumos({ tipoInsumo: 'bomba', categoria: tipoSkid })
-          .subscribe(list => this.bombaOptions = list);
-      } else {
-        this.bombaOptions = [];
-      }
-
-      // Skids por tipo
-      if (tipoSkid) {
-        this.skidService.getSkidByTipo(tipoSkid).subscribe((data) => {
-          this.skids = data.map((skid) => ({ label: `${skid.nombre}, lts: ${skid.lts}`, value: skid.id }));
-          this.formOrden.get('skid')?.enable();
-
-          if (tipoSkid === 'SOLAR') {
-            this.formOrden.get('baterias')?.enable();
-          } else {
-            this.formOrden.get('baterias')?.setValue('No aplica');
-            this.formOrden.get('baterias')?.disable();
-          }
-        });
-      } else {
-        this.skids = [];
-        this.formOrden.get('skid')?.setValue(null);
-        this.formOrden.get('skid')?.disable();
-        this.formOrden.get('baterias')?.setValue('No aplica');
-      }
-    });
-    // Cargar otras opciones necesarias (skid, bombas, tableros, etc.)
-    // this.loadOtherOptions();
   }
 
-  cargarCompnentes() {
-    this.componentService.getRecetaByTipo("Tablero").subscribe((data) => {
-      this.tableroOptions = data.map((tablero) => ({ name: `${tablero.nombre}`, code: tablero.id }));
-      console.log(this.tableroOptions);
-    })
-
-    this.componentService.getRecetaByTipo("Instrumento").subscribe((data) => {
-      this.instrumentoOptions = data.map((instrumento) => ({ name: `${instrumento.nombre}`, code: instrumento.id }));
-    })
-
-  }
-
-  loadData() {
+  // ---- Cargas iniciales
+  private loadClientes() {
     this.clienteService.getClientes().subscribe((data) => {
       this.clientes = data;
-      this.clientesOptions = data.map(cliente => ({ label: cliente.nombre, value: cliente.id }));
-    })
+      this.clientesOptions = data.map(c => ({ label: c.nombre, value: c.id ?? null }));
+    });
   }
 
-  get panelesFA() { return this.formOrden.get('paneles') as import('@angular/forms').FormArray; }
-  get bombasFA() { return this.formOrden.get('bombasDet') as import('@angular/forms').FormArray; }
+  private loadRecetas() {
+    this.recetaService.getRecetaByTipo('Tablero').subscribe((data) => {
+      this.tableroOptions = data.map(t => ({ id: t.id!, name: t.nombre, codeText: t.codigo }));
+    });
+    this.recetaService.getRecetaByTipo('Instrumento').subscribe((data) => {
+      this.instrumentoOptions = data.map(i => ({ id: i.id!, name: i.nombre, codeText: i.codigo }));
+    });
+  }
 
+  private loadPaneles() {
+    this.insumoService.getInsumos({ tipoInsumo: 'panel' })
+      .subscribe((list: Array<{ name: string; id: number }>) => this.panelOptions = list);
+  }
 
+  // ---- Navegación del wizard
   nextStep() {
-    // Validar el paso actual antes de avanzar
-    if (this.activeIndex === 0) {
-      this.validateStep1();
-    } else if (this.activeIndex === 1) {
-      this.validateStep2();
-    }
+    if (this.activeIndex === 0) this.validateStep1();
+    else if (this.activeIndex === 1) this.validateStep2();
 
     if (this.activeIndex < this.steps.length - 1 && this.isStepValid(this.activeIndex)) {
       this.activeIndex++;
     }
   }
 
-  // Verifica si el paso actual es válido
+  prevStep() {
+    if (this.activeIndex > 0) this.activeIndex--;
+  }
+
   isStepValid(stepIndex: number): boolean {
     if (stepIndex === 1) {
       const arraysOk = this.panelesFA.valid && this.bombasFA.valid;
@@ -287,10 +278,8 @@ export class OrdenFabricacionModalComponent implements OnInit {
         this.formOrden.get('tanque')!.valid &&
         this.formOrden.get('calibracion')!.valid;
     }
-    // resto igual
     return stepIndex === 0
-      ? /* tu validación del paso 1 */
-      this.formOrden.get('codigo')!.valid &&
+      ? this.formOrden.get('codigo')!.valid &&
       this.formOrden.get('cliente')!.valid &&
       this.formOrden.get('prioridad')!.valid &&
       this.formOrden.get('fechaEntrega')!.valid &&
@@ -299,97 +288,146 @@ export class OrdenFabricacionModalComponent implements OnInit {
       : true;
   }
 
-  // Validación específica para el paso 1
   validateStep1() {
-    const step1Controls = [
-      'codigo', 'cliente', 'prioridad',
-      'fechaEntrega', 'contacto', 'yacimiento'
-    ];
-
-    step1Controls.forEach(controlName => {
-      this.formOrden.get(controlName)?.markAsTouched();
-    });
+    ['codigo', 'cliente', 'prioridad', 'fechaEntrega', 'contacto', 'yacimiento']
+      .forEach(n => this.formOrden.get(n)?.markAsTouched());
   }
 
-  // Validación específica para el paso 2
   validateStep2() {
     ['cantidadSkid', 'tipoSkid', 'skid', 'tanque', 'calibracion']
       .forEach(n => this.formOrden.get(n)?.markAsTouched());
-    this.panelesFA.controls.forEach(c => c.markAllAsTouched());
-    this.bombasFA.controls.forEach(c => c.markAllAsTouched());
+    this.panelesFA.controls.forEach(c => (c as FormGroup).markAllAsTouched());
+    this.bombasFA.controls.forEach(c => (c as FormGroup).markAllAsTouched());
   }
 
-  prevStep() {
-    if (this.activeIndex > 0) {
-      this.activeIndex--;
+  // ---- Acciones UI
+  addPanel() {
+    this.panelesFA.push(this.fb.group({
+      modelo: [null, Validators.required],
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+    }));
+  }
+  removePanel(i: number) { this.panelesFA.removeAt(i); }
+
+  addBomba() {
+    const totalPermitido = 4 * (this.formOrden.get('cantidadSkid')?.value || 1);
+    const totalActual = this.bombasFA.value.reduce((acc: number, it: any) => acc + (Number(it.cantidad) || 0), 0);
+    if (totalActual >= totalPermitido) return;
+    this.bombasFA.push(this.fb.group({
+      modelo: [null, Validators.required],
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+    }));
+  }
+  removeBomba(i: number) { this.bombasFA.removeAt(i); }
+
+  // ---- Confirmar (guardar)
+  async confirm(): Promise<void> {
+    // Validación del paso actual (defensivo)
+    if (!this.isStepValid(this.activeIndex)) {
+      this.validateStep1();
+      this.validateStep2();
+      return;
+    }
+
+    const v = this.formOrden.value;
+    const esSolar = v.tipoSkid === 'SOLAR';
+
+    const paneles = (v.paneles ?? [])
+      .filter((it: any) => it?.modelo && it?.cantidad)
+      .map((it: any) => ({ insumoId: Number(it.modelo), cantidad: Number(it.cantidad) }));
+
+    const bombas = (v.bombasDet ?? [])
+      .filter((it: any) => it?.modelo && it?.cantidad)
+      .map((it: any) => ({ insumoId: Number(it.modelo), cantidad: Number(it.cantidad) }));
+
+    const tableros: number[] = Array.isArray(v.tableros) ? v.tableros.map((id: any) => Number(id)) : [];
+    const instrumentos: number[] = Array.isArray(v.instrumentos) ? v.instrumentos.map((id: any) => Number(id)) : [];
+
+    const fechaEntregaISO =
+      v.fechaEntrega instanceof Date ? v.fechaEntrega.toISOString() : v.fechaEntrega;
+
+    const snapshotSkid = {
+      paneles: esSolar ? paneles : [],
+      bombas,
+      tableros,
+      instrumentos,
+      tanque: !!v.tanque,
+      calibracion: !!v.calibracion,
+      psv: v.psv || '',
+      baterias: esSolar ? v.baterias : 'No aplica',
+    };
+
+    // --- 1) si hay archivo, lo subimos al storage y tomamos la URL ---
+    let adjuntoUrl: string | null = null;
+    const file: File | undefined = v.fileOC;
+
+    try {
+      this.loading = true;
+
+      if (file) {
+        // Validaciones rápidas client-side
+        const okTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+        if (!okTypes.includes(file.type)) {
+          // reemplazá por tu toast si usás MessageService acá también
+          alert('Tipo de archivo no permitido. Solo PDF/PNG/JPG.');
+          this.loading = false;
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) { // 10MB
+          alert('El archivo excede los 10MB.');
+          this.loading = false;
+          return;
+        }
+
+        const resp = await lastValueFrom(this.ordenService.uploadOC(file)); // { url: string }
+        adjuntoUrl = resp?.url ?? null;
+      }
+
+      // --- 2) armamos el payload final y creamos la OF ---
+      const orderDataFinal = {
+        cantidad: Number(v.cantidadSkid),
+        productoFabricadoId: Number(v.skid),
+        codigo: v.codigo,
+        yacimiento: Number(v.yacimiento),
+        observaciones: v.observaciones || '',
+        nroPresupuesto: v.pto ? Number(v.pto) : undefined,
+        prioridad: String(v.prioridad).toUpperCase(), // BAJA | MEDIA | ALTA
+        fechaEntrega: fechaEntregaISO,
+        pedidoCliente: {
+          numero: v.nroOC,
+          adjunto: adjuntoUrl, // ← si no hubo archivo queda null
+          clienteId: Number(v.cliente),
+          contactoId: Number(v.contacto),
+        },
+        snapshotSkid
+      } as const;
+
+      const data = await lastValueFrom(this.ordenService.createOrdenFabricacion(orderDataFinal));
+
+      // éxito
+      this.closeModal.emit(data);
+      this.close();
+    } catch (err: any) {
+      // Manejo simple; si tenés MessageService, reemplazá el alert por toast
+      const msg = err?.error?.message || err?.message || 'Error al crear la orden';
+      alert(msg);
+    } finally {
+      this.loading = false;
     }
   }
 
-  confirm(): void {
-    const v = this.formOrden.value;
-
-    // Normalizo arrays (si no hay, mando [])
-    const paneles = (v.paneles ?? []).map((it: any) => ({
-      insumoId: Number(it.modelo),     // <-- ID del panel
-      cantidad: Number(it.cantidad),   // <-- Cantidad
-      tipo: 'panel'                    // opcional si te sirve en backend
-    }));
-
-    const bombas = (v.bombasDet ?? []).map((it: any) => ({
-      insumoId: Number(it.modelo),     // <-- ID de la bomba
-      cantidad: Number(it.cantidad),   // <-- Cantidad
-      tipo: 'bomba'                    // opcional
-    }));
-
-    const snapshotSkid = {
-      paneles,             // ej: [{insumoId:53048, cantidad:2}, ...]
-      bombas,              // ej: [{insumoId:123, cantidad:1}, ...]
-      tanque: v.tanque,
-      calibracion: v.calibracion,
-      psv: v.psv,
-      tableros: v.tableros,            // si son IDs, OK; si no, mapear igual que arriba
-      instrumentos: v.instrumentos,
-      productoFabricadoId: v.skid
-    };
-
-    const orderDataFinal = {
-      cantidad: v.cantidadSkid,
-      productoFabricadoId: v.skid,
-      codigo: v.codigo,
-      yacimiento: v.yacimiento,
-      observaciones: v.observaciones,
-      nroPresupuesto: v.pto,
-      prioridad: v.prioridad,
-      fechaEntrega: v.fechaEntrega,
-      pedidoCliente: {
-        numero: v.nroOC,
-        adjunto: v.fileOC ?? null,
-        clienteId: v.cliente,
-        contactoId: v.contacto,
-      },
-      snapshotSkid
-    };
-
-    this.ordenService.createOrdenFabricacion(orderDataFinal).subscribe((data) => {
-      this.closeModal.emit(data);
-      this.close();
-    });
-  }
-
-  cancel() {
-    this.close();
-  }
-
+  // ---- Utilidades UI
+  cancel() { this.close(); }
   close() {
     this.display = false;
     this.closeModal.emit();
   }
 
-  onFileSelect(event: any) {
-    // Al seleccionar archivo, asigna a la propiedad (por ejemplo, nroOCFile)
-    const file = event.files[0];
+  onFileSelect(e: any) {
+    const file = e.files?.[0];
     this.formOrden.patchValue({ fileOC: file });
   }
+
 
   getClienteNombre(clienteId: any): string {
     const cliente = this.clientes.find(c => c.id === clienteId);
@@ -397,91 +435,18 @@ export class OrdenFabricacionModalComponent implements OnInit {
   }
 
   getContactoNombre(contactoId: any): string {
-    // Similar, buscando en la lista de contactos de algún modo
-    const contacto = this.contactosOptions.find(c => c.value === contactoId);
+    const contacto = this.contactosOptions.find(c => c.value === contactIdAsNumber(contactoId));
     return contacto ? contacto.label : '';
   }
 
-  // Helper para Tableros (asumiendo que tableroOptions contiene { name, code })
-  getTablerosNames(): string {
-    if (this.formOrden.value.tableros && Array.isArray(this.formOrden.value.tableros)) {
-      return this.formOrden.value.tableros.map((code: string) => {
-        const found = this.tableroOptions.find(t => t.code === code);
-        return found ? found.name : code;
-      }).join(', ');
-    }
-    return '–';
-  }
-
-  // Helper para Instrumentos
-  getInstrumentosNames(): string {
-    if (this.formOrden.value.instrumentos && Array.isArray(this.formOrden.value.instrumentos)) {
-      return this.formOrden.value.instrumentos.map((code: string) => {
-        const found = this.instrumentoOptions.find(i => i.code === code);
-        return found ? found.name : code;
-      }).join(', ');
-    }
-    return '–';
-  }
-
   getSkidName(): string {
-    const selectedSkid = this.skids.find((item) => item.value === this.formOrden.value.skid);
-    return selectedSkid ? selectedSkid.label : this.formOrden.value.skid;
+    const selected = this.skids.find(s => s.value === Number(this.formOrden.value.skid));
+    return selected ? selected.label : String(this.formOrden.value.skid ?? '—');
   }
-
-  // Dentro de tu componente:
-  exportToPDF(): void {
-    const data = document.getElementById('pdfContent');
-    if (data) {
-      html2canvas(data, { scale: 2 }).then(canvas => {
-        const imgWidth = 210; // Ancho A4 en mm
-        const pageHeight = 295; // Altura A4 en mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-
-        const contentDataURL = canvas.toDataURL('image/png');
-        let pdf = new jsPDF('p', 'mm', 'a4');
-        let position = 0;
-
-        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-        pdf.save(`orden_fabricacion_${new Date().getTime()}.pdf`);
-      });
-    }
-  }
-
-
-  addPanel() {
-    this.panelesFA.push(this.fb.group({
-      modelo: [null, Validators.required],
-      cantidad: [1, [Validators.required, Validators.min(1)]],
-    }));
-  }
-
-  removePanel(i: number) { this.panelesFA.removeAt(i); }
-
-  addBomba() {
-    const totalPermitido = 4 * (this.formOrden.get('cantidadSkid')?.value || 1);
-    const totalActual = this.bombasFA.value.reduce((acc: number, it: any) => acc + (Number(it.cantidad) || 0), 0);
-    if (totalActual >= totalPermitido) return; // corta en seco
-    this.bombasFA.push(this.fb.group({
-      modelo: [null, Validators.required],
-      cantidad: [1, [Validators.required, Validators.min(1)]],
-    }));
-  }
-
-  removeBomba(i: number) { this.bombasFA.removeAt(i); }
-
 
   private getNombreById(list: { name: string; id: number }[], id: any): string {
-    return list.find(x => String(x.id) === String(id))?.name ?? String(id ?? '–');
+    const found = list.find(x => String(x.id) === String(id));
+    return found ? found.name : String(id ?? '–');
   }
 
   getBombasNames(): string {
@@ -497,4 +462,45 @@ export class OrdenFabricacionModalComponent implements OnInit {
       .map((it: any) => `${this.getNombreById(this.panelOptions, it.modelo)} x${Number(it.cantidad) || 0}`)
       .join(', ');
   }
+
+  getTablerosNames(): string {
+    const ids: number[] = this.formOrden.value.tableros || [];
+    if (!ids.length) return '–';
+    return ids.map((id) => this.tableroOptions.find(t => t.id === id)?.name || id).join(', ');
+  }
+
+  getInstrumentosNames(): string {
+    const ids: number[] = this.formOrden.value.instrumentos || [];
+    if (!ids.length) return '–';
+    return ids.map((id) => this.instrumentoOptions.find(i => i.id === id)?.name || id).join(', ');
+  }
+
+  exportToPDF(): void {
+    const data = document.getElementById('pdfContent');
+    if (!data) return;
+    html2canvas(data, { scale: 2 }).then(canvas => {
+      const imgWidth = 210, pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      const contentDataURL = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let position = 0;
+
+      pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save(`orden_fabricacion_${Date.now()}.pdf`);
+    });
+  }
+}
+
+function contactIdAsNumber(val: any): number {
+  return typeof val === 'string' ? Number(val) : val;
 }

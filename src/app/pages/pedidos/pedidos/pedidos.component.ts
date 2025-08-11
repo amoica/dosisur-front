@@ -55,11 +55,11 @@ export class PedidosComponent implements OnInit {
   filtroFechaHasta: Date | null = null;
   filtroCliente: string = '';
 
- 
+
 
   constructor(private ordenService: OrdenFabricacionService, private router: Router) {
 
-   
+
 
   }
 
@@ -67,9 +67,9 @@ export class PedidosComponent implements OnInit {
     this.loadPedidoFabricacion();
   }
 
-  loadPedidoFabricacion(){
-    this.ordenService.getAllOrdenDeFabricacion().subscribe((data)=>{
-      
+  loadPedidoFabricacion() {
+    this.ordenService.getAllOrdenDeFabricacion().subscribe((data) => {
+
       this.pedidos = data.data;
       console.log(this.pedidos);
     })
@@ -79,7 +79,7 @@ export class PedidosComponent implements OnInit {
   showOrdenFabricacion() {
     this.displayOrdenFabricacion = true;
   }
-  
+
   showOrdenTrabajo() {
     this.displayOrdenTrabajo = true;
   }
@@ -101,6 +101,7 @@ export class PedidosComponent implements OnInit {
     console.log("Dar de baja el pedido:", pedido);
   }
   verPedido(idPedido: number) {
+    console.log(idPedido);
     this.router.navigate(['gestion-general/pedidos/', idPedido]);
   }
 }

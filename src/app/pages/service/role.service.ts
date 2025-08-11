@@ -1,15 +1,19 @@
 // src/app/services/roles.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Role } from '../roles/role.interface';
 import { Permission } from '../roles/permission.interface';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 @Injectable({ providedIn: 'root' })
 export class RolesService {
-  private base = 'http://localhost:3000/api'; // <- ajusta tu URL
 
-  constructor(private http: HttpClient) {}
+
+  private readonly cfg = inject<AppConfig>(APP_CONFIG);
+  private base = `${this.cfg.apiUrl}`;
+
+  constructor(private http: HttpClient) { }
 
   /** Roles */
   getRoles(): Observable<Role[]> {

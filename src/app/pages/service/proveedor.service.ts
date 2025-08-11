@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 export interface Contacto {
   id?: number;
@@ -31,8 +32,10 @@ export interface Proveedor {
   providedIn: 'root',
 })
 export class ProveedorService {
-  private readonly apiUrl = 'http://localhost:3000/api/proveedor';
 
+    private readonly cfg = inject<AppConfig>(APP_CONFIG);
+    private apiUrl = `${this.cfg.apiUrl}/proveedor`;
+  
   constructor(private http: HttpClient) {}
 
   getProveedores(): Observable<Proveedor[]> {

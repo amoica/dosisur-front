@@ -34,7 +34,7 @@
                                 "glob": "**/*",
                                 "input": "src/assets",
                                 "output": "/assets"
-                              }
+                            }
                         ],
                         "styles": [
                             "node_modules/primeflex/primeflex.css",
@@ -97,7 +97,10 @@
                             }
                         ],
                         "styles": [
-                            "src/styles.scss"
+                            "src/styles.scss",
+                            "node_modules/primeicons/primeicons.css",
+                            "node_modules/primeng/resources/themes/sakai-light/theme.css",
+                            "node_modules/primeng/resources/primeng.min.css"
                         ],
                         "scripts": []
                     }
@@ -106,6 +109,6 @@
         }
     },
     "cli": {
-      "analytics": "f2107ac5-4008-4bdf-a84f-56f032db61bc"
+        "analytics": "f2107ac5-4008-4bdf-a84f-56f032db61bc"
     }
 }

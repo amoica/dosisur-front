@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FluidModule } from 'primeng/fluid';
 
 @Component({
   standalone: true,
@@ -21,7 +22,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     InputTextModule,
     ToastModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    FluidModule
   ],
   providers: [MessageService],
   templateUrl: './stock.component.html',

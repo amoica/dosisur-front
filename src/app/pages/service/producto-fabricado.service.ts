@@ -1,16 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 // Interfaces para tipar la estructura de los objetos
 export interface SkidSectionItem {
   insumoId: number;
   cantidad: number;
   unidad: string;
-  insumo?:{
+  insumo?: {
     name: string;
     code: string;
-    description:string;
+    description: string;
   }
 }
 
@@ -33,7 +34,11 @@ export interface ProductoFabricado {
   providedIn: 'root'
 })
 export class ProductoFabricadoService {
-  private apiUrl = 'http://localhost:3000/api/producto-fabricado';
+
+
+  private readonly cfg = inject<AppConfig>(APP_CONFIG);
+  private apiUrl = `${this.cfg.apiUrl}/producto-fabricado`;
+
 
   constructor(private http: HttpClient) { }
 
@@ -41,7 +46,7 @@ export class ProductoFabricadoService {
   createSkid(skid: any): Observable<any> {
     for (let [key, value] of skid.entries()) {
       console.log(key, value);
-    }    return this.http.post(this.apiUrl, skid);
+    } return this.http.post(this.apiUrl, skid);
   }
 
   // Obtiene todos los skids (con información básica)

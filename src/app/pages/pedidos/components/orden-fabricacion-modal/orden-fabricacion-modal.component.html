@@ -1,441 +1,424 @@
 <p-dialog header="Crear Orden de Fabricación" [(visible)]="display" [modal]="true" [maximizable]="true"
-    [draggable]="false" [dismissableMask]="true" [blockScroll]="true"
-    [breakpoints]="{ '1200px': '70vw', '960px': '90vw', '640px': '96vw' }" [style]="{ width: '68vw' }"
-    [baseZIndex]="1200" [contentStyle]="{ 'max-height': '72vh', 'overflow': 'auto' }" (onHide)="close()">
-    <!-- Stepper sticky -->
-    <div class="wizard-header">
-        <p-steps [model]="steps" [activeIndex]="activeIndex"></p-steps>
+  [draggable]="false" [dismissableMask]="true" [blockScroll]="true"
+  [breakpoints]="{ '1200px': '70vw', '960px': '90vw', '640px': '96vw' }" [style]="{ width: '68vw' }" [baseZIndex]="1200"
+  [contentStyle]="{ 'max-height': '72vh', 'overflow': 'auto' }" (onHide)="close()">
+
+  <!-- Stepper sticky -->
+  <div class="wizard-header">
+    <p-steps [model]="steps" [activeIndex]="activeIndex"></p-steps>
+  </div>
+
+  <div class="wizard-content">
+    <form [formGroup]="formOrden" class="space-y-5">
+      <ng-container [ngSwitch]="activeIndex">
+
+        <!-- PASO 1 -->
+        <section *ngSwitchCase="0" class="card-section">
+          <div class="section-header">
+            <i class="pi pi-info-circle"></i>
+            <h3>Información General</h3>
+            <p class="section-hint">Completá los datos base para identificar la orden.</p>
+          </div>
+
+          <div class="p-fluid form-grid">
+            <div class="field">
+              <label for="codigo">Código</label>
+              <input id="codigo" type="text" pInputText formControlName="codigo" />
+              <small *ngIf="formOrden.get('codigo')?.invalid && formOrden.get('codigo')?.touched" class="p-error">
+                Código es requerido
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="nroOC">Nro OC</label>
+              <input id="nroOC" type="text" pInputText formControlName="nroOC" />
+              <small class="hint">Número de orden de compra del cliente.</small>
+            </div>
+
+            <div class="field">
+              <label for="fechaEntrega">Fecha de Entrega</label>
+              <p-datepicker id="fechaEntrega" class="w-full" formControlName="fechaEntrega" dateFormat="dd/mm/yy"
+                placeholder="Seleccioná fecha"></p-datepicker>
+              <small *ngIf="formOrden.get('fechaEntrega')?.invalid && formOrden.get('fechaEntrega')?.touched"
+                class="p-error">
+                Fecha de entrega es requerida
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="cliente">Cliente</label>
+              <p-dropdown id="cliente" [options]="clientesOptions" formControlName="cliente"
+                placeholder="Seleccionar cliente" [showClear]="true" [filter]="true" filterBy="label"
+                [appendTo]="'body'"></p-dropdown>
+              <small *ngIf="formOrden.get('cliente')?.invalid && formOrden.get('cliente')?.touched" class="p-error">
+                Cliente es requerido
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="contacto">Contacto</label>
+              <p-dropdown id="contacto" [options]="contactosOptions" formControlName="contacto"
+                placeholder="Seleccionar contacto" [showClear]="true" [filter]="true" filterBy="label"
+                [appendTo]="'body'"></p-dropdown>
+              <small *ngIf="formOrden.get('contacto')?.invalid && formOrden.get('contacto')?.touched" class="p-error">
+                Contacto es requerido
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="yacimiento">Yacimiento</label>
+              <p-dropdown id="yacimiento" [options]="yacimientoOptions" formControlName="yacimiento"
+                placeholder="Seleccionar yacimiento" [showClear]="true" [filter]="true" filterBy="label"
+                [appendTo]="'body'"></p-dropdown>
+              <small *ngIf="formOrden.get('yacimiento')?.invalid && formOrden.get('yacimiento')?.touched"
+                class="p-error">
+                Yacimiento es requerido
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="prioridad">Prioridad</label>
+              <p-dropdown id="prioridad" [options]="prioridadOptions" formControlName="prioridad"
+                placeholder="Seleccionar prioridad" [showClear]="true" [appendTo]="'body'"></p-dropdown>
+              <small *ngIf="formOrden.get('prioridad')?.invalid && formOrden.get('prioridad')?.touched" class="p-error">
+                Prioridad es requerida
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="pto">Presupuesto Dosisur Nro</label>
+              <input id="pto" type="number" pInputText formControlName="pto" />
+              <small class="hint">Opcional. AP/PO interno si aplica.</small>
+            </div>
+          </div>
+
+          <div class="p-fluid">
+            <div class="field">
+              <label for="observaciones">Observaciones</label>
+              <textarea pTextarea id="observaciones" class="w-full" formControlName="observaciones" rows="4"
+                pSize="large" style="resize: none"
+                placeholder="Notas adicionales, requisitos especiales, etc."></textarea>
+            </div>
+
+            <div class="field">
+              <label for="fileOC">Adjuntar Orden de Compra</label>
+              <p-fileUpload id="fileOC" mode="basic" [auto]="false" [customUpload]="false" chooseLabel="Adjuntar OC"
+                (onSelect)="onFileSelect($event)">
+              </p-fileUpload>
+              <small class="hint">PDF/JPG/PNG, máx 10 MB.</small>
+            </div>
+          </div>
+        </section>
+
+        <!-- PASO 2 -->
+        <section *ngSwitchCase="1" class="card-section">
+          <div class="section-header">
+            <i class="pi pi-sliders-h"></i>
+            <h3>Configuración del Skid</h3>
+            <p class="section-hint">Definí el tipo, componentes y cantidades.</p>
+          </div>
+
+          <div class="p-fluid form-grid">
+            <div class="field">
+              <label>Cantidad de Skid</label>
+              <input type="number" pInputText formControlName="cantidadSkid" min="1" />
+            </div>
+
+            <div class="field">
+              <label>Tipo de Skid</label>
+              <p-select formControlName="tipoSkid" [options]="skidOptions" optionLabel="name" optionValue="name"
+                placeholder="Seleccionar tipo" [appendTo]="'body'"
+                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-select>
+            </div>
+
+            <div class="field">
+              <label>Skid</label>
+              <p-select formControlName="skid" [options]="skids" optionLabel="label" optionValue="value"
+                placeholder="Seleccionar skid" [appendTo]="'body'"
+                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-select>
+            </div>
+
+            <div class="field" *ngIf="showPaneles">
+              <label>Baterías</label>
+              <p-select formControlName="baterias" [options]="baterias" optionLabel="name" optionValue="name"
+                placeholder="Seleccionar baterías" [appendTo]="'body'"></p-select>
+            </div>
+          </div>
+
+          <!-- Paneles -->
+          <div class="subsection" *ngIf="showPaneles" formArrayName="paneles">
+            <div class="subsection-header">
+              <i class="pi pi-sun"></i>
+              <h4>Paneles (modelo + cantidad)</h4>
+              <span class="meta">Seleccione uno o varios modelos y cantidades.</span>
+            </div>
+
+            <div *ngFor="let _ of panelesFA.controls; let i = index" [formGroupName]="i" class="row-repeat">
+              <div class="col-main">
+                <p-select class="w-full" [appendTo]="'body'" [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"
+                  [options]="panelOptions" optionLabel="name" optionValue="id" placeholder="Seleccionar panel"
+                  formControlName="modelo" [filter]="true" filterBy="name" [showClear]="true" [virtualScroll]="true"
+                  [virtualScrollItemSize]="36" [emptyMessage]="'Sin resultados'"></p-select>
+              </div>
+
+              <div class="col-qty">
+                <input type="number" pInputText min="1" formControlName="cantidad" />
+              </div>
+
+              <div class="col-actions">
+                <button pButton type="button" icon="pi pi-trash" severity="danger" (click)="removePanel(i)"
+                  [disabled]="panelesFA.length===1" class="icon-btn" pTooltip="Eliminar fila"></button>
+              </div>
+            </div>
+
+            <button pButton type="button" icon="pi pi-plus" label="Agregar panel" (click)="addPanel()"></button>
+          </div>
+
+          <!-- Bombas -->
+          <div class="subsection" formArrayName="bombasDet">
+            <div class="subsection-header">
+              <i class="pi pi-cog"></i>
+              <h4>Bombas (modelo + cantidad)</h4>
+              <span class="meta">Límite: {{ 4 * (formOrden.get('cantidadSkid')?.value || 1) }} bombas totales.</span>
+            </div>
+
+            <div *ngFor="let _ of bombasFA.controls; let i = index" [formGroupName]="i" class="row-repeat">
+              <div class="col-main">
+                <p-select class="w-full" [appendTo]="'body'" [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"
+                  [options]="bombaOptions" optionLabel="name" optionValue="id" placeholder="Seleccionar bomba"
+                  formControlName="modelo" [filter]="true" filterBy="name" [showClear]="true" [virtualScroll]="true"
+                  [virtualScrollItemSize]="36" [emptyMessage]="'Sin resultados'"></p-select>
+              </div>
+
+              <div class="col-qty">
+                <input type="number" pInputText min="1" formControlName="cantidad" />
+              </div>
+
+              <div class="col-actions">
+                <button pButton type="button" icon="pi pi-trash" severity="danger" (click)="removeBomba(i)"
+                  [disabled]="bombasFA.length===1" class="icon-btn" pTooltip="Eliminar fila"></button>
+              </div>
+            </div>
+
+            <button pButton type="button" icon="pi pi-plus" label="Agregar bomba" (click)="addBomba()"></button>
+          </div>
+
+          <!-- Binarios + PSV -->
+          <div class="p-fluid form-grid">
+            <div class="field">
+              <label>Tanque</label>
+              <div class="inline-options">
+                <div *ngFor="let r of tanque" class="field-checkbox">
+                  <p-radiobutton [inputId]="'tanque_'+r.key" [value]="r.key" formControlName="tanque"></p-radiobutton>
+                  <label [for]="'tanque_'+r.key">{{ r.name }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Calibración</label>
+              <div class="inline-options">
+                <div *ngFor="let r of calibracion" class="field-checkbox">
+                  <p-radiobutton [inputId]="'cal_'+r.key" [value]="r.key" formControlName="calibracion"></p-radiobutton>
+                  <label [for]="'cal_'+r.key">{{ r.name }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field col-span-2">
+              <label for="psv">SET PSV</label>
+              <textarea pTextarea id="psv" class="w-full" formControlName="psv" rows="2" pSize="large"
+                style="resize:none"></textarea>
+              <small class="hint">Ej: seteo de válvula de seguridad.</small>
+            </div>
+          </div>
+
+          <!-- Multiselects -->
+          <div class="p-fluid form-grid">
+            <div class="field">
+              <label>Tableros</label>
+              <p-multiselect formControlName="tableros" [options]="tableroOptions" optionLabel="name" optionValue="id"
+                placeholder="Seleccionar tableros" [display]="'chip'" [filter]="true" [appendTo]="'body'"
+                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }">
+                <ng-template let-opt pTemplate="item">
+                  {{ opt.name }} <small *ngIf="opt.codeText">({{ opt.codeText }})</small>
+                </ng-template>
+              </p-multiselect>
+            </div>
+
+            <div class="field">
+              <label>Instrumentos</label>
+              <p-multiselect formControlName="instrumentos" [options]="instrumentoOptions" optionLabel="name"
+                optionValue="id" placeholder="Seleccionar instrumentos" [display]="'chip'" [filter]="true"
+                [appendTo]="'body'" [panelStyle]="{ 'max-height':'320px','overflow':'auto' }">
+                <ng-template let-opt pTemplate="item">
+                  {{ opt.name }} <small *ngIf="opt.codeText">({{ opt.codeText }})</small>
+                </ng-template>
+              </p-multiselect>
+            </div>
+          </div>
+
+          <p class="note">
+            Las opciones seleccionadas se asignarán al snapshot de la orden para futuras reservas.
+          </p>
+        </section>
+
+        <!-- PASO 3 -->
+        <section *ngSwitchCase="2" class="summary-wrap" id="pdfContent">
+          <div class="summary-card">
+            <header class="summary-header">
+              <div class="brand">
+                <i class="pi pi-briefcase"></i>
+                <div>
+                  <h2>Orden de Fabricación</h2>
+                  <small class="muted">Resumen previo a confirmar</small>
+                </div>
+              </div>
+              <div class="actions">
+                <button pButton type="button" label="Exportar a PDF" icon="pi pi-file-pdf" class="p-button-warning"
+                  (click)="exportToPDF()"></button>
+              </div>
+            </header>
+
+            <div class="id-strip">
+              <div class="item">
+                <span class="label">Código</span>
+                <span class="value">{{ formOrden.value.codigo }}</span>
+              </div>
+              <div class="item">
+                <span class="label">Nro OC</span>
+                <span class="value">
+                  {{ formOrden.value.nroOC || '—' }}
+                  <small class="muted">— {{ getClienteNombre(formOrden.value.cliente) }}</small>
+                </span>
+              </div>
+              <div class="item">
+                <span class="label">Entrega</span>
+                <span class="value">{{ formOrden.value.fechaEntrega | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <div class="card">
+                <h3 class="card-title">Información General</h3>
+                <div class="kv">
+                  <div>
+                    <span class="k">Cliente</span>
+                    <span class="v">{{ getClienteNombre(formOrden.value.cliente) }}</span>
+                  </div>
+                  <div>
+                    <span class="k">Contacto</span>
+                    <span class="v">{{ getContactoNombre(formOrden.value.contacto) }}</span>
+                  </div>
+                  <div>
+                    <span class="k">Yacimiento</span>
+                    <span class="v">{{ formOrden.value.yacimiento }}</span>
+                  </div>
+                  <div>
+                    <span class="k">Prioridad</span>
+                    <span class="v">{{ formOrden.value.prioridad }}</span>
+                  </div>
+                  <div class="span2">
+                    <span class="k">Presupuesto Dosisur Nro</span>
+                    <span class="v">{{ formOrden.value.pto || '—' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Configuración del Skid</h3>
+                <div class="kv">
+                  <div>
+                    <span class="k">Cantidad</span>
+                    <span class="v">{{ formOrden.value.cantidadSkid }}</span>
+                  </div>
+                  <div>
+                    <span class="k">Tipo</span>
+                    <span class="v">{{ formOrden.value.tipoSkid }}</span>
+                  </div>
+                  <div class="span2">
+                    <span class="k">Skid</span>
+                    <span class="v">{{ getSkidName() }}</span>
+                  </div>
+
+                  <div *ngIf="showPaneles">
+                    <span class="k">Baterías</span>
+                    <span class="v">{{ formOrden.value.baterias }}</span>
+                  </div>
+
+                  <div *ngIf="showPaneles" class="span2 comp-block">
+                    <h4><i class="pi pi-sun"></i> Paneles</h4>
+                    <div class="chip-list">
+                      <span class="chip">{{ getPanelesNames() || '—' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="span2 comp-block">
+                    <h4><i class="pi pi-cog"></i> Bombas</h4>
+                    <div class="chip-list">
+                      <span class="chip">{{ getBombasNames() || '—' }}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span class="k">Tanque</span>
+                    <span class="v">{{ formOrden.value.tanque ? 'Sí' : 'No' }}</span>
+                  </div>
+                  <div>
+                    <span class="k">Calibración</span>
+                    <span class="v">{{ formOrden.value.calibracion ? 'Sí' : 'No' }}</span>
+                  </div>
+                  <div class="span2">
+                    <span class="k">SET PSV</span>
+                    <span class="v">{{ formOrden.value.psv || '—' }}</span>
+                  </div>
+
+                  <div class="span2 comp-block">
+                    <h4><i class="pi pi-th-large"></i> Tableros</h4>
+                    <div class="chip-list">
+                      <span class="chip">{{ getTablerosNames() || '—' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="span2 comp-block">
+                    <h4><i class="pi pi-sliders-h"></i> Instrumentos</h4>
+                    <div class="chip-list">
+                      <span class="chip">{{ getInstrumentosNames() || '—' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card span2">
+                <h3 class="card-title">Observaciones</h3>
+                <p class="preline">{{ formOrden.value.observaciones || '—' }}</p>
+              </div>
+            </div>
+
+            <div class="summary-footer">
+              <div class="meta">
+                <span>Documento emitido el: {{ today | date:'dd/MM/yyyy' }}</span>
+                <span>Confidencial – Uso Interno</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </ng-container>
+    </form>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="wizard-footer">
+      <button pButton type="button" label="Anterior" icon="pi pi-arrow-left" (click)="prevStep()"
+        [disabled]="activeIndex === 0"></button>
+
+      <button pButton type="button" [label]="activeIndex === steps.length - 1 ? 'Confirmar' : 'Siguiente'"
+        icon="pi pi-arrow-right" iconPos="right"
+        [disabled]="activeIndex < steps.length - 1 && !isStepValid(activeIndex)"
+        (click)="activeIndex === steps.length - 1 ? confirm() : nextStep()"></button>
+
+      <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="cancel()"></button>
     </div>
-
-    <div class="wizard-content">
-        <form [formGroup]="formOrden" class="space-y-5">
-            <ng-container [ngSwitch]="activeIndex">
-
-                <!-- PASO 1 -->
-                <section *ngSwitchCase="0" class="card-section">
-                    <div class="section-header">
-                        <i class="pi pi-info-circle"></i>
-                        <h3>Información General</h3>
-                        <p class="section-hint">Completá los datos base para identificar la orden.</p>
-                    </div>
-
-                    <div class="p-fluid form-grid">
-                        <div class="field">
-                            <label for="codigo">Código</label>
-                            <input id="codigo" type="text" pInputText formControlName="codigo" />
-                            <small *ngIf="formOrden.get('codigo')?.invalid && formOrden.get('codigo')?.touched"
-                                class="p-error">
-                                Código es requerido
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="nroOC">Nro OC</label>
-                            <input id="nroOC" type="text" pInputText formControlName="nroOC" />
-                            <small class="hint">Número de orden de compra del cliente.</small>
-                        </div>
-
-                        <div class="field">
-                            <label for="fechaEntrega">Fecha de Entrega</label>
-                            <p-datepicker id="fechaEntrega" class="w-full" formControlName="fechaEntrega"
-                                dateFormat="dd/mm/yy" placeholder="Seleccioná fecha"></p-datepicker>
-                            <small
-                                *ngIf="formOrden.get('fechaEntrega')?.invalid && formOrden.get('fechaEntrega')?.touched"
-                                class="p-error">
-                                Fecha de entrega es requerida
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="cliente">Cliente</label>
-                            <p-dropdown id="cliente" [options]="clientesOptions" formControlName="cliente"
-                                placeholder="Seleccionar cliente" [showClear]="true" [filter]="true" filterBy="label"
-                                [appendTo]="'body'"></p-dropdown>
-                            <small *ngIf="formOrden.get('cliente')?.invalid && formOrden.get('cliente')?.touched"
-                                class="p-error">
-                                Cliente es requerido
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="contacto">Contacto</label>
-                            <p-dropdown id="contacto" [options]="contactosOptions" formControlName="contacto"
-                                placeholder="Seleccionar contacto" [showClear]="true" [filter]="true" filterBy="label"
-                                [appendTo]="'body'"></p-dropdown>
-                            <small *ngIf="formOrden.get('contacto')?.invalid && formOrden.get('contacto')?.touched"
-                                class="p-error">
-                                Contacto es requerido
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="yacimiento">Yacimiento</label>
-                            <p-dropdown inputId="yacimiento" [options]="yacimientoOptions"
-                                placeholder="Seleccionar yacimiento" formControlName="yacimiento" [showClear]="true"
-                                [filter]="true" filterBy="label" [appendTo]="'body'"></p-dropdown>
-                            <small *ngIf="formOrden.get('yacimiento')?.invalid && formOrden.get('yacimiento')?.touched"
-                                class="p-error">
-                                Yacimiento es requerido
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="prioridad">Prioridad</label>
-                            <p-dropdown id="prioridad" [options]="prioridadOptions" formControlName="prioridad"
-                                placeholder="Seleccionar prioridad" [showClear]="true" [appendTo]="'body'"></p-dropdown>
-                            <small *ngIf="formOrden.get('prioridad')?.invalid && formOrden.get('prioridad')?.touched"
-                                class="p-error">
-                                Prioridad es requerida
-                            </small>
-                        </div>
-
-                        <div class="field">
-                            <label for="pto">Presupuesto Dosisur Nro</label>
-                            <input id="pto" type="number" pInputText formControlName="pto" />
-                            <small class="hint">Opcional. AP/PO interno si aplica.</small>
-                        </div>
-                    </div>
-
-                    <div class="p-fluid">
-                        <div class="field">
-                            <label for="observaciones">Observaciones</label>
-                            <textarea pTextarea id="observaciones" class="w-full" formControlName="observaciones"
-                                rows="4" pSize="large" style="resize: none"
-                                placeholder="Notas adicionales, requisitos especiales, etc."></textarea>
-                        </div>
-
-                        <div class="field">
-                            <label for="fileOC">Adjuntar Orden de Compra</label>
-                            <p-fileUpload id="fileOC" mode="basic" customUpload="true" chooseLabel="Subir archivo"
-                                (onSelect)="onFileSelect($event)" [auto]="true"></p-fileUpload>
-                            <small class="hint">Formatos permitidos: PDF, JPG, PNG. Máx 10 MB.</small>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PASO 2 -->
-                <section *ngSwitchCase="1" class="card-section">
-                    <div class="section-header">
-                        <i class="pi pi-sliders-h"></i>
-                        <h3>Configuración del Skid</h3>
-                        <p class="section-hint">Definí el tipo, componentes y cantidades.</p>
-                    </div>
-
-                    <div class="p-fluid form-grid">
-                        <div class="field">
-                            <label>Cantidad de Skid</label>
-                            <input type="number" pInputText formControlName="cantidadSkid" min="1" />
-                        </div>
-
-                        <div class="field">
-                            <label>Tipo de Skid</label>
-                            <p-select formControlName="tipoSkid" [options]="skidOptions" optionLabel="name"
-                                optionValue="name" placeholder="Seleccionar tipo" [appendTo]="'body'"
-                                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-select>
-                        </div>
-
-                        <div class="field">
-                            <label>Skid</label>
-                            <p-select formControlName="skid" [options]="skids" placeholder="Seleccionar skid"
-                                [appendTo]="'body'"
-                                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-select>
-                        </div>
-
-                        <div class="field" *ngIf="showPaneles">
-                            <label>Baterías</label>
-                            <p-select formControlName="baterias" [options]="baterias" optionLabel="name"
-                                optionValue="name" placeholder="Seleccionar baterías" [appendTo]="'body'"></p-select>
-                        </div>
-                    </div>
-
-                    <!-- Paneles -->
-                    <div class="subsection" *ngIf="showPaneles" formArrayName="paneles">
-                        <div class="subsection-header">
-                            <i class="pi pi-sun"></i>
-                            <h4>Paneles (modelo + cantidad)</h4>
-                            <span class="meta">Seleccione uno o varios modelos y cantidades.</span>
-                        </div>
-
-                        <div *ngFor="let _ of panelesFA.controls; let i = index" [formGroupName]="i" class="row-repeat">
-                            <div class="col-main">
-                                <p-select class="w-full" [appendTo]="'body'"
-                                    [panelStyle]="{ 'max-height':'320px','overflow':'auto' }" [options]="panelOptions"
-                                    optionLabel="name" optionValue="id" placeholder="Seleccionar panel"
-                                    formControlName="modelo" [filter]="true" filterBy="name" [showClear]="true"
-                                    [virtualScroll]="true" [virtualScrollItemSize]="36"
-                                    [emptyMessage]="'Sin resultados'"></p-select>
-                            </div>
-
-                            <div class="col-qty">
-                                <input type="number" pInputText min="1" formControlName="cantidad" />
-                            </div>
-
-                            <div class="col-actions">
-                                <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                    (click)="removePanel(i)" [disabled]="panelesFA.length===1" class="icon-btn"
-                                    pTooltip="Eliminar fila"></button>
-                            </div>
-                        </div>
-
-                        <button pButton type="button" icon="pi pi-plus" label="Agregar panel"
-                            (click)="addPanel()"></button>
-                    </div>
-
-                    <!-- Bombas -->
-                    <div class="subsection" formArrayName="bombasDet">
-                        <div class="subsection-header">
-                            <i class="pi pi-cog"></i>
-                            <h4>Bombas (modelo + cantidad)</h4>
-                            <span class="meta">Límite: {{4 * (formOrden.get('cantidadSkid')?.value || 1)}} bombas
-                                totales.</span>
-                        </div>
-
-                        <div *ngFor="let _ of bombasFA.controls; let i = index" [formGroupName]="i" class="row-repeat">
-                            <div class="col-main">
-                                <p-select class="w-full" [appendTo]="'body'"
-                                    [panelStyle]="{ 'max-height':'320px','overflow':'auto' }" [options]="bombaOptions"
-                                    optionLabel="name" optionValue="id" placeholder="Seleccionar bomba"
-                                    formControlName="modelo" [filter]="true" filterBy="name" [showClear]="true"
-                                    [virtualScroll]="true" [virtualScrollItemSize]="36"
-                                    [emptyMessage]="'Sin resultados'"></p-select>
-                            </div>
-
-                            <div class="col-qty">
-                                <input type="number" pInputText min="1" formControlName="cantidad" />
-                            </div>
-
-                            <div class="col-actions">
-                                <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                    (click)="removeBomba(i)" [disabled]="bombasFA.length===1" class="icon-btn"
-                                    pTooltip="Eliminar fila"></button>
-                            </div>
-                        </div>
-
-                        <button pButton type="button" icon="pi pi-plus" label="Agregar bomba"
-                            (click)="addBomba()"></button>
-                    </div>
-
-                    <!-- Binarios + PSV -->
-                    <div class="p-fluid form-grid">
-                        <div class="field">
-                            <label>Tanque</label>
-                            <div class="inline-options">
-                                <div *ngFor="let r of tanque" class="field-checkbox">
-                                    <p-radiobutton [inputId]="'tanque_'+r.key" [value]="r.key"
-                                        formControlName="tanque"></p-radiobutton>
-                                    <label [for]="'tanque_'+r.key">{{ r.name }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <label>Calibración</label>
-                            <div class="inline-options">
-                                <div *ngFor="let r of calibracion" class="field-checkbox">
-                                    <p-radiobutton [inputId]="'cal_'+r.key" [value]="r.key"
-                                        formControlName="calibracion"></p-radiobutton>
-                                    <label [for]="'cal_'+r.key">{{ r.name }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="field col-span-2">
-                            <label for="psv">SET PSV</label>
-                            <textarea pTextarea id="psv" class="w-full" formControlName="psv" rows="2" pSize="large"
-                                style="resize:none"></textarea>
-                            <small class="hint">Ej: seteo de válvula de seguridad.</small>
-                        </div>
-                    </div>
-
-                    <!-- Multiselects -->
-                    <div class="p-fluid form-grid">
-                        <div class="field">
-                            <label>Tableros</label>
-                            <p-multiselect formControlName="tableros" [options]="tableroOptions" optionLabel="name"
-                                optionValue="code" placeholder="Seleccionar tableros" [display]="'chip'" [filter]="true"
-                                [appendTo]="'body'"
-                                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-multiselect>
-                        </div>
-
-                        <div class="field">
-                            <label>Instrumentos</label>
-                            <p-multiselect formControlName="instrumentos" [options]="instrumentoOptions"
-                                optionLabel="name" optionValue="code" placeholder="Seleccionar instrumentos"
-                                [display]="'chip'" [filter]="true" [appendTo]="'body'"
-                                [panelStyle]="{ 'max-height':'320px','overflow':'auto' }"></p-multiselect>
-                        </div>
-                    </div>
-
-                    <p class="note">
-                        Las opciones seleccionadas se asignarán a la configuración congelada del skid (snapshotSkid)
-                        para reservar materiales.
-                    </p>
-                </section>
-
-                <!-- PASO 3 -->
-                <section *ngSwitchCase="2" class="summary-wrap" id="pdfContent">
-                    <div class="summary-card">
-                        <!-- Header con acción -->
-                        <header class="summary-header">
-                            <div class="brand">
-                                <i class="pi pi-briefcase"></i>
-                                <div>
-                                    <h2>Orden de Fabricación</h2>
-                                    <small class="muted">Resumen previo a confirmar</small>
-                                </div>
-                            </div>
-
-                            <div class="actions">
-                                <button pButton type="button" label="Exportar a PDF" icon="pi pi-file-pdf"
-                                    class="p-button-warning" (click)="exportToPDF()"></button>
-                            </div>
-                        </header>
-
-                        <!-- Tira identificatoria -->
-                        <div class="id-strip">
-                            <div class="item">
-                                <span class="label">Código</span>
-                                <span class="value">{{ formOrden.value.codigo }}</span>
-                            </div>
-                            <div class="item">
-                                <span class="label">Nro OC</span>
-                                <span class="value">
-                                    {{ formOrden.value.nroOC || '—' }}
-                                    <small class="muted">— {{ getClienteNombre(formOrden.value.cliente) }}</small>
-                                </span>
-                            </div>
-                            <div class="item">
-                                <span class="label">Entrega</span>
-                                <span class="value">{{ formOrden.value.fechaEntrega | date:'dd/MM/yyyy' }}</span>
-                            </div>
-                        </div>
-
-                        <!-- Grid de tarjetas -->
-                        <div class="summary-grid">
-                            <!-- General -->
-                            <div class="card">
-                                <h3 class="card-title">Información General</h3>
-                                <div class="kv">
-                                    <div>
-                                        <span class="k">Cliente</span>
-                                        <span class="v">{{ getClienteNombre(formOrden.value.cliente) }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="k">Contacto</span>
-                                        <span class="v">{{ getContactoNombre(formOrden.value.contacto) }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="k">Yacimiento</span>
-                                        <span class="v">{{ formOrden.value.yacimiento }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="k">Prioridad</span>
-                                        <span class="v">{{ formOrden.value.prioridad }}</span>
-                                    </div>
-                                    <div class="span2">
-                                        <span class="k">Presupuesto Dosisur Nro</span>
-                                        <span class="v">{{ formOrden.value.pto || '—' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Skid -->
-                            <div class="card">
-                                <h3 class="card-title">Configuración del Skid</h3>
-                                <div class="kv">
-                                    <div>
-                                        <span class="k">Cantidad</span>
-                                        <span class="v">{{ formOrden.value.cantidadSkid }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="k">Tipo</span>
-                                        <span class="v">{{ formOrden.value.tipoSkid }}</span>
-                                    </div>
-                                    <div class="span2">
-                                        <span class="k">Skid</span>
-                                        <span class="v">{{ getSkidName() }}</span>
-                                    </div>
-
-                                    <div *ngIf="showPaneles">
-                                        <span class="k">Baterías</span>
-                                        <span class="v">{{ formOrden.value.baterias }}</span>
-                                    </div>
-                                    <div *ngIf="showPaneles" class="span2 comp-block">
-                                        <h4><i class="pi pi-sun"></i> Paneles</h4>
-                                        <div class="chip-list">
-                                            <!-- Texto generado por helper: "PANEL 450 W x2, PANEL 470 W x1" -->
-                                            <span class="chip">{{ getPanelesNames() || '—' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="span2 comp-block">
-                                        <h4><i class="pi pi-cog"></i> Bombas</h4>
-                                        <div class="chip-list">
-                                            <span class="chip">{{ getBombasNames() || '—' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <span class="k">Tanque</span>
-                                        <span class="v">{{ formOrden.value.tanque ? 'Sí' : 'No' }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="k">Calibración</span>
-                                        <span class="v">{{ formOrden.value.calibracion ? 'Sí' : 'No' }}</span>
-                                    </div>
-                                    <div class="span2">
-                                        <span class="k">SET PSV</span>
-                                        <span class="v">{{ formOrden.value.psv || '—' }}</span>
-                                    </div>
-
-                                    <div class="span2 comp-block">
-                                        <h4><i class="pi pi-th-large"></i> Tableros</h4>
-                                        <div class="chip-list">
-                                            <span class="chip">{{ getTablerosNames() || '—' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="span2 comp-block">
-                                        <h4><i class="pi pi-sliders-h"></i> Instrumentos</h4>
-                                        <div class="chip-list">
-                                            <span class="chip">{{ getInstrumentosNames() || '—' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Observaciones (ocupa 2 columnas) -->
-                            <div class="card span2">
-                                <h3 class="card-title">Observaciones</h3>
-                                <p class="preline">{{ formOrden.value.observaciones || '—' }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Footer del documento -->
-                        <div class="summary-footer">
-                            <div class="meta">
-                                <span>Documento emitido el: {{ today | date:'dd/MM/yyyy' }}</span>
-                                <span>Confidencial – Uso Interno</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-
-            </ng-container>
-        </form>
-    </div>
-
-    <!-- Footer del wizard (dentro del modal) -->
-    <ng-template pTemplate="footer">
-        <div class="wizard-footer">
-            <button pButton type="button" label="Anterior" icon="pi pi-arrow-left" (click)="prevStep()"
-                [disabled]="activeIndex === 0"></button>
-            <button pButton type="button" [label]="activeIndex === steps.length - 1 ? 'Confirmar' : 'Siguiente'"
-                icon="pi pi-arrow-right" iconPos="right"
-                [disabled]="activeIndex < steps.length - 1 && !isStepValid(activeIndex)"
-                (click)="activeIndex === steps.length - 1 ? confirm() : nextStep()"></button>
-            <button pButton type="button" label="Cancelar" class="p-button-secondary" (click)="cancel()"></button>
-        </div>
-    </ng-template>
+  </ng-template>
 </p-dialog>

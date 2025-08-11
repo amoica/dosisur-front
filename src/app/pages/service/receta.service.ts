@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Articulo } from './articulo-service.service';
+import { Articulo } from '../../core/model/articulo.model';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 export interface Receta {
   id?: number;
@@ -30,7 +31,9 @@ export interface RecetaArticulo extends Articulo {
 })
 export class RecetaService {
 
-  private apiUrl = 'http://localhost:3000/api/receta'; // Ajusta la URL a la de tu API
+
+  private readonly cfg = inject<AppConfig>(APP_CONFIG);
+  private apiUrl = `${this.cfg.apiUrl}/receta`;
 
   constructor(private http: HttpClient) { }
 

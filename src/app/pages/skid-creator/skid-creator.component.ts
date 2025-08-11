@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RecetaService, Receta } from '../service/receta.service';
 import { ProductoFabricadoService, ProductoFabricado } from '../service/producto-fabricado.service';
-import { ArticuloServiceService, Articulo } from '../service/articulo-service.service';
+import { ArticuloServiceService } from '../service/articulo-service.service';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { CommonModule } from '@angular/common';
 import { TabViewModule } from 'primeng/tabview';
@@ -15,6 +15,7 @@ import { FileUpload } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SkidDetailDialogComponent } from './skid-detail-dialog/skid-detail-dialog.component';
+import { Articulo } from '../../core/model/articulo.model';
 
 
 @Component({
@@ -140,6 +141,7 @@ export class SkidCreatorComponent implements OnInit {
   /** Obtiene los artículos/insumos */
   fetchArticulos(): void {
     this.articuloService.getArticulos().subscribe((res: any) => {
+      console.log(res);
       this.articulos = res.data || res;
     });
   }

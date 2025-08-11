@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, tap } from 'rxjs';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 interface LoginResponse{
   token:string,
@@ -15,7 +16,8 @@ interface LoginResponse{
 
 export class AuthService {
 
-  private apiUrl = 'http://localhost:3000/api';
+  private readonly cfg = inject<AppConfig>(APP_CONFIG);
+  private apiUrl = this.cfg.apiUrl;
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
 
   isLoggedIn$ = this.isLoggedInSubject.asObservable();

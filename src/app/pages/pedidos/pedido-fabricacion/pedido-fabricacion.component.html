@@ -1,209 +1,340 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<p-card class="order-card shadow-sm my-6">
-  <!-- Encabezado -->
-  <div class="order-header">
-    <div class="header-left">
-      <img
-        src="https://media.licdn.com/dms/image/v2/D4D03AQFp-muMD-juEA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1720460116069?e=1750896000&v=beta&t=tcUzBxNlkGbobKOTj_voSZrxm2BOITDFuKd26t2yG-E"
-        alt="Logo" class="order-logo" />
-      <div>
-        <h1 class="order-title">Dosisur</h1>
-        <div class="order-address">
-          <p>Au-San Martin 123A</p>
-          <p>Cipolletti, Bio Magno</p>
-          <p>Argentina</p>
+<p-card class="of-card" *ngIf="vm$ | async as vm">
+  <ng-container *ngIf="!vm.loading; else loadingShell">
+    <!-- HEADER -->
+    <header class="of-header">
+      <div class="of-header__left">
+        <img class="of-logo" src="assets/image/logo.jpg" alt="Logo" />
+        <div>
+          <h1 class="of-title">Orden de Fabricación</h1>
+          <div class="of-sub">Código <strong>{{ vm.pedido?.codigo }}</strong></div>
         </div>
       </div>
-    </div>
-    <div class="order-info">
-      <p><span>Orden #</span> {{ pedido.codigo }}</p>
-      <p><span>Emitida:</span> {{ pedido.fechaEmision | date:'dd/MM/yyyy' }}</p>
-      <p><span>Estado: </span> <span>{{ pedido.estado }}</span></p>
-    </div>
-  </div>
 
-  <p-divider></p-divider>
-
-  <!-- Información Principal -->
-  <div class="order-main">
-    <!-- Cliente -->
-    <div class="order-section">
-      <h3><i class="pi pi-user mr-2"></i> Cliente</h3>
-      <p><strong>Nombre:</strong> {{ pedido.pedidoCliente?.cliente?.nombre }}</p>
-      <p><strong>Contacto:</strong> {{ pedido.pedidoCliente?.contacto?.nombre }}</p>
-      <p><strong>Email / Tel:</strong> {{ pedido.pedidoCliente?.contacto?.email }} / {{
-        pedido.pedidoCliente?.contacto?.telefono }}</p>
-    </div>
-    <!-- Orden -->
-    <div class="order-section">
-      <h3><i class="pi pi-file-edit mr-2"></i> Detalles de la Orden</h3>
-      <p><strong>OC #:</strong> {{ pedido.pedidoCliente?.numero }}</p>
-      <p><strong>Entrega:</strong> {{ pedido.fechaEntrega | date:'dd/MM/yyyy' }}</p>
-      <p><strong>Presupuesto:</strong> {{ pedido.nroPresupuesto }}</p>
-      <p><strong>Yacimiento:</strong> {{ pedido.yacimiento }}</p>
-    </div>
-    <!-- Skid -->
-    <div class="order-section">
-      <h3><i class="pi pi-box mr-2"></i> Skid</h3>
-      <p><strong>Producto:</strong> {{ skid.nombre }} ({{ skid.lts }} lts)</p>
-      <p><strong>Tipo:</strong> {{ skid.tipo }}</p>
-      <p><strong>Cantidad:</strong> {{ pedido.cantidad }}</p>
-      <p><strong>Obs.:</strong> {{ pedido.observaciones }}</p>
-    </div>
-  </div>
-
-  <!-- Configuración del Skid -->
-  <div class="order-config">
-    <h3 class="config-title"><i class="pi pi-cog"></i> Configuración del Skid</h3>
-    <div class="config-grid">
-      <div class="config-column">
-        <h4>Energía</h4>
-        <ul>
-          <li><span>Paneles:</span> <span>{{ pedido.snapshotSkid?.potenciaPaneles || 'N/A' }}</span></li>
-          <li><span>Baterías:</span> <span>{{ pedido.snapshotSkid?.baterias || 'N/A' }}</span></li>
-        </ul>
+      <div class="of-header__right">
+        <div><span>Emitida:</span> {{ vm.pedido?.fechaEmision | date:'dd/MM/yyyy' }}</div>
+        <div><span>Estado:</span> <b class="pill" [ngClass]="vm.pedido?.estado">{{ vm.pedido?.estado }}</b></div>
       </div>
-      <div class="config-column">
-        <h4>Componentes</h4>
-        <ul>
-          <li><span>Tanque:</span> <span>{{ pedido.snapshotSkid?.tanque ? 'Sí' : 'No' }}</span></li>
-          <li><span>Calibración:</span> <span>{{ pedido.snapshotSkid?.calibracion ? 'Sí' : 'No' }}</span></li>
-        </ul>
-      </div>
-      <div class="config-column">
-        <h4>Sistema</h4>
-        <ul>
-          <li><span>PSV:</span> <span>{{ pedido.snapshotSkid?.psv || 'N/A' }}</span></li>
-          <li><span>Bombas:</span> <span>{{ pedido.snapshotSkid?.bombas?.join(', ') || 'N/A' }}</span></li>
-        </ul>
-      </div>
-    </div>
+    </header>
 
-    <!-- Componentes del Skid -->
-    <div class="components-section mt-6">
-      <h3 class="config-title"><i class="pi pi-list"></i> Componentes del Skid</h3>
-      <!-- Mostrar FormulasComponent si la orden es editable -->
-      <ng-container *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'; else seccionesCapturadas">
-        <ng-container *ngIf="skid.secciones?.length">
-          <app-formulas *ngFor="let seccion of skid.secciones"
-            [idComponente]="seccion.baseComponenteId!"></app-formulas>
-        </ng-container>
-        <ng-container *ngIf="pedido.snapshotSkid?.tableros?.length">
-          <app-formulas *ngFor="let tablero of pedido.snapshotSkid.tableros" [idComponente]="tablero"></app-formulas>
-        </ng-container>
-        <ng-container *ngIf="pedido.snapshotSkid?.instrumentos?.length">
-          <app-formulas *ngFor="let instrumento of pedido.snapshotSkid.instrumentos"
-            [idComponente]="instrumento"></app-formulas>
-        </ng-container>
-      </ng-container>
+    <p-divider class="of-divider"></p-divider>
 
-      <!-- Secciones capturadas desde snapshot -->
-      <ng-template #seccionesCapturadas>
-        <div *ngFor="let seccion of pedido.snapshotSkid?.seccionesExtras">
-          <p-fieldset [legend]="seccion.nombre" [toggleable]="true" class="fieldset-contenedor">
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>Cantidad</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of seccion.items">
-                  <td>{{ getNombreArticulo(item.insumoId) }}</td>
-                  <td>{{ item.cantidad }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </p-fieldset>
+    <!-- INFO GRID -->
+    <section class="of-grid of-grid--3">
+      <div class="of-box">
+        <h3><i class="pi pi-user mr-2"></i> Cliente</h3>
+        <div class="of-kv">
+          <div><span>Nombre</span><b>{{ vm.pedido?.pedidoCliente?.cliente?.nombre || '—' }}</b></div>
+          <div><span>Contacto</span><b>{{ vm.pedido?.pedidoCliente?.contacto?.nombre || '—' }}</b></div>
+          <div><span>Email</span><b class="wrap">{{ vm.pedido?.pedidoCliente?.contacto?.email || '—' }}</b></div>
+          <div><span>Tel</span><b class="wrap">{{ vm.pedido?.pedidoCliente?.contacto?.telefono || '—' }}</b></div>
         </div>
-      </ng-template>
-    </div>
-  </div>
+      </div>
 
-  <!-- Componentes adicionales para esta Orden -->
-  <form [formGroup]="snapshotForm" *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'">
+      <div class="of-box">
+        <h3><i class="pi pi-file-edit mr-2"></i> Orden</h3>
+        <div class="of-kv">
+          <div><span>OC #</span><b class="wrap">{{ vm.pedido?.pedidoCliente?.numero || '—' }}</b></div>
+          <div><span>Entrega</span><b>{{ vm.pedido?.fechaEntrega | date:'dd/MM/yyyy' }}</b></div>
+          <div><span>Presupuesto</span><b>{{ vm.pedido?.nroPresupuesto || '—' }}</b></div>
+          <div><span>Yacimiento</span><b class="wrap">{{ vm.pedido?.yacimiento?.nombre || '—' }}</b></div>
 
-    <div class="components-section mt-6">
-      <h3 class="config-title">
-        <i class="pi pi-plus-circle mr-2"></i> Componentes adicionales para esta Orden
-      </h3>
+          <!-- Adjunto -->
+          <div class="of-adjunto">
+            <span>Adjunto OC</span>
 
-      <div formArrayName="seccionesExtras">
-        <div *ngFor="let seccion of seccionesExtras.controls; let i = index" [formGroupName]="i"
-          class="component-block">
-          <!-- Header del componente -->
-          <div class="component-header mb-4">
-            <input type="text" pInputText formControlName="nombre" placeholder="Nombre del componente"
-              class="text-xl font-semibold w-full" />
-          </div>
+            <!-- SI HAY ADJUNTO: mostrar link -->
+            <ng-container *ngIf="vm.pedido?.pedidoCliente?.adjunto; else noAdjunto">
+              <a [href]="vm.pedido?.pedidoCliente?.adjunto" target="_blank" rel="noopener" class="pill pill--link">
+                <i class="pi pi-paperclip mr-2"></i> Ver archivo
+              </a>
+            </ng-container>
 
-          <!-- Tabla de ítems -->
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody formArrayName="items">
-              <tr *ngFor="let item of getItems(i).controls; let j = index" [formGroupName]="j">
-                <td>
-                  <p-dropdown formControlName="insumoId" [options]="articulos" optionLabel="name" optionValue="id"
-                    placeholder="Seleccione insumo" [filter]="true" filterPlaceholder="Buscar..."></p-dropdown>
-                </td>
-                <td>
-                  <input type="number" pInputText formControlName="cantidad" placeholder="Cantidad" min="1" />
-                </td>
-                <td class="actions-cell">
-                  <button pButton type="button" icon="pi pi-trash" severity="danger"
-                    (click)="removeItem(i, j)"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Botones dentro de la sección -->
-          <div class="section-button-group">
-            <button pButton type="button" icon="pi pi-plus" label="Agregar Ítem" (click)="addItem(i)"></button>
-            <button pButton type="button" icon="pi pi-trash" label="Eliminar Sección" severity="danger"
-              (click)="removeSeccion(i)" class="ml-2"></button>
+            <!-- SI NO HAY ADJUNTO: uploader inline -->
+            <ng-template #noAdjunto>
+              <div class="of-actions">
+                <p-fileUpload mode="basic" [auto]="true" [customUpload]="true" chooseLabel="Subir OC"
+                  (uploadHandler)="uploadOCHandler($event, vm.pedido?.id)" [disabled]="loading || isLocked"
+                  accept=".pdf,image/png,image/jpeg">
+                </p-fileUpload>
+                <small class="hint">PDF/JPG/PNG. Máx 10 MB.</small>
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
 
-      <!-- Botón para agregar nuevo componente -->
-      <div class="text-left mt-3">
-        <button pButton type="button" icon="pi pi-plus-circle" label="Agregar nuevo Componente" class="p-button-primary"
-          (click)="addSeccion('personalizada')"></button>
+
+
+      <div class="of-box">
+        <h3><i class="pi pi-box mr-2"></i> Skid</h3>
+        <div class="of-kv">
+          <div><span>Producto</span><b class="wrap">{{ vm.skid?.nombre }} ({{ vm.skid?.lts }} lts)</b></div>
+          <div><span>Tipo</span><b>{{ vm.skid?.tipo }}</b></div>
+          <div><span>Cantidad</span><b>{{ vm.pedido?.cantidad }}</b></div>
+          <div><span>Obs</span><b class="wrap">{{ vm.pedido?.observaciones || '—' }}</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDITOR -->
+    <form *ngIf="form" [formGroup]="form" class="of-editor p-fluid">
+      <p-accordion [multiple]="true" styleClass="of-accordion">
+        <p-accordionTab header="Resumen" [selected]="true">
+          <div class="of-summary">
+            <span class="pill pill--info">Componentes Skid: {{ skidFA.length }}</span>
+            <span class="pill pill--info">Tableros: {{ tabsFA.length }}</span>
+            <span class="pill pill--info">Instrumentos: {{ instFA.length }}</span>
+            <span class="pill pill--muted">Paneles: {{ panelesFA.length }}</span>
+            <span class="pill pill--muted">Bombas: {{ bombasFA.length }}</span>
+          </div>
+        </p-accordionTab>
+
+        <p-accordionTab header="Configuración básica">
+          <section class="of-grid of-grid--3">
+            <div class="of-box">
+              <h4>Energía / PSV</h4>
+              <div class="of-field">
+                <label>Baterías</label>
+                <input pInputText formControlName="baterias" placeholder="No aplica" class="w-full" />
+              </div>
+              <div class="of-field">
+                <label>SET PSV</label>
+                <textarea pInputTextarea formControlName="psv" rows="2" class="w-full"></textarea>
+              </div>
+            </div>
+
+            <div class="of-box">
+              <h4>Flags</h4>
+              <div class="of-toggles">
+                <p-toggleButton class="w-full" formControlName="tanque" onLabel="Tanque: Sí"
+                  offLabel="Tanque: No"></p-toggleButton>
+                <p-toggleButton class="w-full" formControlName="calibracion" onLabel="Calibración: Sí"
+                  offLabel="Calibración: No"></p-toggleButton>
+              </div>
+            </div>
+
+            <div class="of-box">
+              <h4>Tableros / Instrumentos</h4>
+              <div class="of-field">
+                <label>Tableros</label>
+                <p-multiSelect class="w-full" formControlName="tablerosIds" [options]="vm.tableroOptions"
+                  optionLabel="name" optionValue="id" [display]="'chip'" [filter]="true" filterBy="name"
+                  defaultLabel="Seleccionar..." (onChange)="onTablerosIdsChange($event.value)" appendTo="body">
+                </p-multiSelect>
+              </div>
+              <div class="of-field">
+                <label>Instrumentos</label>
+                <p-multiSelect class="w-full" formControlName="instrumentosIds" [options]="vm.instrumentoOptions"
+                  optionLabel="name" optionValue="id" [display]="'chip'" [filter]="true" filterBy="name"
+                  defaultLabel="Seleccionar..." (onChange)="onInstrumentosIdsChange($event.value)" appendTo="body">
+                </p-multiSelect>
+              </div>
+            </div>
+          </section>
+        </p-accordionTab>
+
+        <p-accordionTab header="Componentes del Skid">
+          <div class="of-secciones" formArrayName="seccionesSkid">
+            <button pButton type="button" icon="pi pi-plus-circle" label="Agregar componente personalizado"
+              (click)="addCustomSection('skid')" severity="help" [outlined]="true" class="of-add-btn"></button>
+
+            <div class="of-seccion" *ngFor="let sec of skidFA.controls; trackBy: trackByCtrl; let si = index"
+              [formGroupName]="si">
+              <div class="of-seccion__head">
+                <input pInputText placeholder="Nombre del componente" formControlName="nombre" class="of-sec-name">
+                <span class="of-sec-badge" *ngIf="sec.value?.tipo==='receta'">Base del Skid</span>
+                <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                  size="small" (click)="removeSection('skid', si)"></button>
+              </div>
+
+              <div class="of-items" [formArrayName]="'items'">
+                <div class="of-item"
+                  *ngFor="let it of itemsFA('skid', si).controls; trackBy: trackByCtrl; let ji = index"
+                  [formGroupName]="ji">
+                  <p-dropdown class="of-grow" [options]="vm.articulos" optionLabel="name" optionValue="id"
+                    [virtualScroll]="true" [virtualScrollItemSize]="vm.itemSize" [filter]="true" filterBy="name"
+                    formControlName="insumoId" placeholder="Insumo" appendTo="body">
+                  </p-dropdown>
+                  <input pInputText type="number" min="1" formControlName="cantidad" class="of-qty" />
+                  <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    size="small" (click)="removeItem('skid', si, ji)"></button>
+                </div>
+              </div>
+
+              <button pButton type="button" icon="pi pi-plus" label="Agregar ítem" severity="help" [outlined]="true"
+                size="small" class="of-add-btn" (click)="addItem('skid', si)"></button>
+            </div>
+          </div>
+        </p-accordionTab>
+
+        <p-accordionTab header="Tableros seleccionados">
+          <div class="of-secciones" formArrayName="seccionesTableros">
+            <button pButton type="button" icon="pi pi-plus-circle" label="Agregar sección personalizada"
+              (click)="addCustomSection('tableros')" severity="help" [outlined]="true" class="of-add-btn"></button>
+
+            <div class="of-seccion" *ngFor="let sec of tabsFA.controls; trackBy: trackByCtrl; let si = index"
+              [formGroupName]="si">
+              <div class="of-seccion__head">
+                <input pInputText placeholder="Nombre" formControlName="nombre" class="of-sec-name">
+                <span class="of-sec-badge" *ngIf="sec.value?.tipo==='receta'">Tablero #{{ sec.value?.baseComponenteId
+                  }}</span>
+                <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                  size="small" (click)="removeSection('tableros', si)"></button>
+              </div>
+
+              <div class="of-items" [formArrayName]="'items'">
+                <div class="of-item"
+                  *ngFor="let it of itemsFA('tableros', si).controls; trackBy: trackByCtrl; let ji = index"
+                  [formGroupName]="ji">
+                  <p-dropdown class="of-grow" [options]="vm.articulos" optionLabel="name" optionValue="id"
+                    [virtualScroll]="true" [virtualScrollItemSize]="vm.itemSize" [filter]="true" filterBy="name"
+                    formControlName="insumoId" placeholder="Insumo" appendTo="body">
+                  </p-dropdown>
+                  <input pInputText type="number" min="1" formControlName="cantidad" class="of-qty" />
+                  <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    size="small" (click)="removeItem('tableros', si, ji)"></button>
+                </div>
+              </div>
+
+              <button pButton type="button" icon="pi pi-plus" label="Agregar ítem" severity="help" [outlined]="true"
+                size="small" class="of-add-btn" (click)="addItem('tableros', si)"></button>
+            </div>
+          </div>
+        </p-accordionTab>
+
+        <p-accordionTab header="Instrumentos seleccionados">
+          <div class="of-secciones" formArrayName="seccionesInstrumentos">
+            <button pButton type="button" icon="pi pi-plus-circle" label="Agregar sección personalizada"
+              (click)="addCustomSection('instrumentos')" severity="help" [outlined]="true" class="of-add-btn"></button>
+
+            <div class="of-seccion" *ngFor="let sec of instFA.controls; trackBy: trackByCtrl; let si = index"
+              [formGroupName]="si">
+              <div class="of-seccion__head">
+                <input pInputText placeholder="Nombre" formControlName="nombre" class="of-sec-name">
+                <span class="of-sec-badge" *ngIf="sec.value?.tipo==='receta'">Instrumento #{{
+                  sec.value?.baseComponenteId }}</span>
+                <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                  size="small" (click)="removeSection('instrumentos', si)"></button>
+              </div>
+
+              <div class="of-items" [formArrayName]="'items'">
+                <div class="of-item"
+                  *ngFor="let it of itemsFA('instrumentos', si).controls; trackBy: trackByCtrl; let ji = index"
+                  [formGroupName]="ji">
+                  <p-dropdown class="of-grow" [options]="vm.articulos" optionLabel="name" optionValue="id"
+                    [virtualScroll]="true" [virtualScrollItemSize]="vm.itemSize" [filter]="true" filterBy="name"
+                    formControlName="insumoId" placeholder="Insumo" appendTo="body">
+                  </p-dropdown>
+                  <input pInputText type="number" min="1" formControlName="cantidad" class="of-qty" />
+                  <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    size="small" (click)="removeItem('instrumentos', si, ji)"></button>
+                </div>
+              </div>
+
+              <button pButton type="button" icon="pi pi-plus" label="Agregar ítem" severity="help" [outlined]="true"
+                size="small" class="of-add-btn" (click)="addItem('instrumentos', si)"></button>
+            </div>
+          </div>
+        </p-accordionTab>
+
+        <p-accordionTab header="Paneles y Bombas">
+          <section class="of-grid of-grid--2">
+            <!-- Paneles -->
+            <div class="of-box">
+              <div class="of-box__head">
+                <h4><i class="pi pi-sun mr-2"></i> Paneles</h4>
+                <button pButton type="button" icon="pi pi-plus" label="Agregar" severity="help" [outlined]="true"
+                  size="small" (click)="addPanelRow()"></button>
+              </div>
+
+              <div formArrayName="paneles" class="of-rows">
+                <div class="of-row" *ngFor="let row of panelesFA.controls; trackBy: trackByCtrl; let i = index"
+                  [formGroupName]="i">
+                  <p-dropdown class="of-grow" [options]="vm.panelOptions" optionLabel="name" optionValue="id"
+                    [virtualScroll]="true" [virtualScrollItemSize]="vm.itemSize" [filter]="true" filterBy="name"
+                    formControlName="insumoId" placeholder="Panel" appendTo="body">
+                  </p-dropdown>
+                  <input pInputText type="number" min="1" formControlName="cantidad" class="of-qty">
+                  <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    size="small" (click)="removePanelRow(i)"></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bombas -->
+            <div class="of-box">
+              <div class="of-box__head">
+                <h4><i class="pi pi-cog mr-2"></i> Bombas</h4>
+                <button pButton type="button" icon="pi pi-plus" label="Agregar" severity="help" [outlined]="true"
+                  size="small" (click)="addBombaRow()"></button>
+              </div>
+
+              <div formArrayName="bombas" class="of-rows">
+                <div class="of-row" *ngFor="let row of bombasFA.controls; trackBy: trackByCtrl; let i = index"
+                  [formGroupName]="i">
+                  <p-dropdown class="of-grow" [options]="vm.bombaOptions" optionLabel="name" optionValue="id"
+                    [virtualScroll]="true" [virtualScrollItemSize]="vm.itemSize" [filter]="true" filterBy="name"
+                    formControlName="insumoId" placeholder="Bomba" appendTo="body">
+                  </p-dropdown>
+                  <input pInputText type="number" min="1" formControlName="cantidad" class="of-qty">
+                  <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                    size="small" (click)="removeBombaRow(i)"></button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </p-accordionTab>
+      </p-accordion>
+
+      <!-- BLOQUEO -->
+      <div *ngIf="isLocked" class="of-lock-banner">
+        <i class="pi pi-lock mr-2"></i> Pedido aprobado: modo solo lectura.
+      </div>
+
+      <!-- BARRA STICKY -->
+      <div class="cta-bar" [class.is-locked]="isLocked">
+        <div class="cta-left">
+          <span class="pill pill--muted">
+            <i class="pi pi-database mr-2"></i>
+            Guardado local listo para enviar
+          </span>
+        </div>
+        <div class="cta-right">
+          <button pButton type="button" label="Confirmar cambios" icon="pi pi-check-circle" severity="secondary"
+            [outlined]="true" (click)="guardarCambios(vm)" [disabled]="form.disabled">
+          </button>
+
+          <button pButton type="button" label="Aprobar pedido" icon="pi pi-check" severity="success" [loading]="loading"
+            (click)="aprobarPedido(vm)" [disabled]="isLocked">
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- EN PROCESO -->
+    <div *ngIf="vm.pedido?.estado === 'APROBADA'" class="of-onlybtn">
+      <button pButton label="Dar curso (EN_PROCESO)" icon="pi pi-play" class="p-button-warning" (click)="darCurso(vm)">
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- SKELETON SHELL -->
+  <ng-template #loadingShell>
+    <div class="p-3">
+      <p-skeleton width="60%" height="1.5rem" class="mb-2"></p-skeleton>
+      <p-skeleton width="40%" height="1rem"></p-skeleton>
+      <div class="of-grid of-grid--3 mt-3">
+        <p-skeleton height="6rem"></p-skeleton>
+        <p-skeleton height="6rem"></p-skeleton>
+        <p-skeleton height="6rem"></p-skeleton>
+      </div>
+      <div class="of-grid of-grid--2 mt-3">
+        <p-skeleton height="10rem"></p-skeleton>
+        <p-skeleton height="10rem"></p-skeleton>
       </div>
     </div>
-
-    <div *ngIf="pedido.estado === 'CREADA' || pedido.estado === 'PENDIENTE'" class="mt-6 text-right">
-      <p-dropdown formControlName="estadoDestino" [options]="estadoOpciones" placeholder="Seleccionar nuevo estado"
-        class="mr-3" optionLabel="label" optionValue="value"></p-dropdown>
-      <button pButton label="Confirmar Cambios" icon="pi pi-check" class="p-button-success"
-        (click)="confirmarCambios()"></button>
-    </div>
-
-   
-  </form>
-
-   <!-- Botón para Procesar Orden -->
-   <div *ngIf="pedido.estado === 'APROBADA'" class="mt-4 text-right">
-    <button pButton label="Procesar Orden" icon="pi pi-play" class="p-button-warning" (click)="darCurso()"></button>
-  </div>
-
-  <!-- Botón para Finalizar Orden y Subir Remito -->
-  <div *ngIf="pedido.estado === 'EN_PROCESO'" class="mt-4 text-right">
-    <p-fileUpload name="remito" url="URL_DEL_BACKEND_PARA_SUBIR_REMITO" accept=".pdf,.jpg,.png" maxFileSize="1000000"
-      auto chooseLabel="Subir Remito" (onUpload)="finalizarOrden($event)">
-    </p-fileUpload>
-  </div>
-
-
-
+  </ng-template>
 </p-card>

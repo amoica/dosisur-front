@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Articulo, ArticuloServiceService } from '../service/articulo-service.service';
+import { ArticuloServiceService } from '../service/articulo-service.service';
 import { Receta, RecetaArticulo, RecetaService } from '../service/receta.service';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -21,6 +21,7 @@ import { Select, SelectModule } from 'primeng/select';
 import { SpellCheckService } from '../../core/service/spell-check.service';
 import { TabViewModule } from 'primeng/tabview';
 import { ImageModule } from 'primeng/image';
+import { Articulo } from '../../core/model/articulo.model';
 
 @Component({
   selector: 'app-receta',
@@ -93,15 +94,18 @@ export class RecetaComponent implements OnInit {
 
   fetchArticulos(): void {
     this.articuloService.getAllArticuleNotFilters().subscribe({
-      next: (data: any) => {
-        this.availableArticulos = data.data?.map((art: any) => ({
+      next: (data: Articulo[]) => {
+        console.log(data);
+        this.availableArticulos = data.map((art: any) => ({
           ...art,
           quantity: 0,
           unidad: art.unidad || 'N/A',
         })) || [];
         this.allArticulosBackup = [...this.availableArticulos];
       },
-      error: () => {
+      error: (err) => {
+        console.log(err);
+
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -128,7 +132,8 @@ export class RecetaComponent implements OnInit {
         ));
         this.tipos.push('Agregar Nuevo...'); // Agrega la opción para agregar un nuevo tipo.
       },
-      error: () => {
+      error: (err) => {
+        console.log(err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

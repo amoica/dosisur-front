@@ -1,0 +1,14 @@
+.report-wip { display:flex; flex-direction:column; gap:1rem; }
+
+.hero {
+  display:flex; gap:1rem; align-items:center; padding:1rem; border-radius:12px;
+  background: linear-gradient(135deg, var(--surface-100), var(--surface-200));
+}
+.hero .pi { font-size:1.8rem; color:var(--primary-color); }
+.hero h2 { margin:0; font-weight:800; }
+.muted { color: var(--text-color-secondary); margin:.25rem 0 0; }
+
+.ghosts { display:flex; flex-direction:column; gap:.75rem; }
+.ghost-row { display:flex; gap:.75rem; }
+
+.actions { margin-top:.5rem; display:flex; justify-content:flex-end; }

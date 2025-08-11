@@ -1,39 +1,45 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { GenericDataService } from '../../core/service/generic-data.service';
 import { Menu } from 'primeng/menu';
-import { map, Observable } from 'rxjs';
+import { map, Observable, shareReplay } from 'rxjs';
 import { MenuModel } from '../model/menu.interface';
 import { MenuItem } from 'primeng/api';
+import { APP_CONFIG, AppConfig } from '../../core/app-config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MenuService extends GenericDataService<Menu> {
 
-    protected apiUrl = 'http://localhost:3000/api/menu';
 
-    getMenuModel(): Observable<MenuItem[]> {
+  private readonly cfg = inject<AppConfig>(APP_CONFIG);
+  protected apiUrl = `${this.cfg.apiUrl}/menu`;
+  private normalizeRoute = (r: string) => (r?.startsWith('/') ? r : `/${r}`);
+
+  getMenuModel(): Observable<MenuItem[]> {
     return this.http.get<MenuModel[]>(this.apiUrl).pipe(
       map(items => {
-        // Agrupar por sección
         const grouped = items.reduce<Record<string, MenuModel[]>>((acc, it) => {
-          (acc[it.section] = acc[it.section] || []).push(it);
+          (acc[it.section || 'General'] = acc[it.section || 'General'] || []).push(it);
           return acc;
         }, {});
-
-        // Mapear a la estructura que PrimeNG espera
         return Object.entries(grouped).map(([section, list]) => ({
           label: section,
           items: list
             .sort((a, b) => a.order - b.order)
             .map(i => ({
-              label:      i.label,
-              icon:       i.icon,
-              routerLink: [i.route]
+              label: i.label,
+              icon: i.icon,
+              routerLink: [this.normalizeRoute(i.route)]
             }))
         }));
-      })
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
     );
+  }
+
+  getMenuRaw(): Observable<MenuModel[]> {
+    return this.http.get<MenuModel[]>(this.apiUrl);
   }
 
 }

@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ArticuloServiceService } from '../../service/articulo-service.service';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TableModule , TableLazyLoadEvent} from 'primeng/table';
+import { Router } from '@angular/router';
+
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { LazyLoadEvent } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
@@ -14,25 +16,19 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
-import { ProveedorService } from '../../service/proveedor.service'; // Asegúrate de tener este servicio
-import { Router } from '@angular/router';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputIconModule } from 'primeng/inputicon';
 import { Select } from 'primeng/select';
 import { FileUpload } from 'primeng/fileupload';
-import { LazyLoadEvent } from 'primeng/api';
+import { TableLazyLoadEvent } from 'primeng/table';
 
+import { ArticuloServiceService } from '../../service/articulo-service.service';
+import { ProveedorService } from '../../service/proveedor.service';
 
 interface InsumoProveedor {
   proveedorId: number;
   codigoProveedor: string;
-  // Se dejará el precioUnitario como null hasta que se actualice con cotización
   precioUnitario?: number | null;
-}
-
-interface UploadEvent {
-  originalEvent: Event;
-  files: File[];
 }
 
 @Component({
@@ -57,7 +53,7 @@ interface UploadEvent {
     InputIconModule,
     Select,
     FileUpload,
-    ToastModule
+    ToastModule,
   ],
   templateUrl: './articulo.component.html',
   styleUrls: ['./articulo.component.scss'],
@@ -66,23 +62,33 @@ interface UploadEvent {
 export class ArticuloComponent implements OnInit {
 
   @ViewChild(FileUpload) fileUpload!: FileUpload;
-  articulos: any[] = [];
-  articulo: any = {};
-  loading: boolean = true;
-  articuloDialog: boolean = false;
-  articuloForm!: FormGroup;
-  globalFilter: string = ''; // Para el buscador global
-  uploadedFiles: any[] = [];
 
-  // Para la relación Insumo-Proveedor
-  insumoProveedores: InsumoProveedor[] = [];
-  insumoProveedorDialog: boolean = false;
-  insumoProveedor: InsumoProveedor = { proveedorId: 0, codigoProveedor: '' };
-  imagenFile: File | null = null;
+  // tabla
+  articulos: any[] = [];
+  loading = true;
   rows = 10;
   totalRecords = 0;
-  searchValue = '';
 
+  // dialog + form
+  articuloDialog = false;
+  articuloForm!: FormGroup;
+  articulo: any = {};
+
+  // imagen
+  imagenFile: File | null = null;
+  imageDialogVisible = false;
+  selectedImage = '';
+
+  // proveedores
+  proveedoresList: any[] = [];
+  insumoProveedores: InsumoProveedor[] = [];
+  insumoProveedorDialog = false;
+  insumoProveedor: InsumoProveedor = { proveedorId: 0, codigoProveedor: '' };
+
+  // categorías
+  categoriasList: any[] = [];
+
+  // unidades
   unitsOptions = [
     { label: 'Metros (m)', value: 'm' },
     { label: 'Centímetros (cm)', value: 'cm' },
@@ -101,104 +107,73 @@ export class ArticuloComponent implements OnInit {
     { label: 'Galones', value: 'galones' },
     { label: 'Pulgadas (in)', value: 'in' },
     { label: 'Toneladas', value: 'toneladas' },
-    // Agrega o quita unidades según lo necesites
   ];
-
-  // Lista de proveedores para el dropdown (se carga desde ProveedorService)
-  proveedoresList: any[] = [];
-
-  imageDialogVisible: boolean = false;
-  selectedImage: string = '';
 
   constructor(
     private articuloService: ArticuloServiceService,
+    private proveedorService: ProveedorService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
     private fb: FormBuilder,
-    private proveedorService: ProveedorService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.initForm();
     this.loadProveedoresList();
+    this.loadCategoriasList();
     this.loadArticulosLazy({ first: 0, rows: this.rows, globalFilter: '' });
-  }
-
-  loadArticulosLazy(event: TableLazyLoadEvent) {
-    this.loading = true;
-
-    // Si rows viene null, usaremos el tamaño por defecto
-    const limit = event.rows ?? this.rows;
-    // idem para first (índice del primer registro)
-    const first = event.first ?? 0;
-    const page = Math.floor(first / limit) + 1;
-    const search = (event.globalFilter as string) || '';
-
-    this.articuloService.getArticulos(page, limit, search)
-      .subscribe({
-        next: (resp:any) => {
-          this.articulos     = resp.data;
-          this.totalRecords  = resp.meta.total;
-          this.loading       = false;
-        },
-        error: err => {
-          this.loading = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error al cargar artículos',
-            detail: err.message || 'Revise su conexión',
-          });
-        }
-      });
   }
 
   initForm() {
     this.articuloForm = this.fb.group({
+      // ¡NO mandamos id en el body!
+      categoriaId: [null],          // usar dropdown
+      categoriaNombre: [''],        // crear nueva por nombre (opcional)
       name: ['', Validators.required],
       code: ['', Validators.required],
-      description: ['', Validators.required],
-      sinonimo: [''], // opcional
+      description: [''],
+      sinonimo: [''],
       minimunStock: [0, [Validators.min(0)]],
       unidad: ['', Validators.required],
       isInventoriable: [false],
       available: [true],
-      imagenUrl: [''], // opcional
+      imagenUrl: [''],
     });
   }
 
-  openImageDialog(imagenUrl: string) {
-    this.selectedImage = imagenUrl;
-    this.imageDialogVisible = true;
-  }
+  // ------- Loads -------
 
-  onFileSelected(event: any) {
-    if (event.files && event.files.length > 0) {
-      this.imagenFile = event.files[0]; // Almacena el archivo seleccionado
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.articulo.imageUrl = reader.result as string;
-      };
-      reader.readAsDataURL(this.imagenFile!);
-    }
-  }
+  loadArticulosLazy(event: TableLazyLoadEvent ) {
+    this.loading = true;
+    const limit = event.rows ?? this.rows;
+    const first = event.first ?? 0;
+    const page = Math.floor(first / limit) + 1;
+    const search = (event.globalFilter as string) || '';
 
-  removeImage() {
-    this.imagenFile = null;
-    this.articulo.imagenUrl = '';
-    if (this.fileUpload) {
-      this.fileUpload.clear();
-    }
+    this.articuloService.getArticulos({ page, limit, search }).subscribe({
+      next: (resp: any) => {
+        this.articulos = resp.data;
+        this.totalRecords = resp.meta.total;
+        this.loading = false;
+      },
+      error: err => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al cargar artículos',
+          detail: err?.message || 'Revise su conexión',
+        });
+      }
+    });
   }
-
 
   loadProveedoresList() {
-    // Se asume que el servicio de proveedores devuelve un arreglo de proveedores
     this.proveedorService.getProveedores().subscribe({
       next: (data: any) => {
-        this.proveedoresList = data; // Ajusta según la respuesta
+        this.proveedoresList = data?.data ?? data; // adaptá a tu respuesta real
       },
-      error: (err) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error al cargar los proveedores',
@@ -208,28 +183,47 @@ export class ArticuloComponent implements OnInit {
     });
   }
 
+  loadCategoriasList() {
+    this.articuloService.getCategorias().subscribe({
+      next: (data: any) => {
+        this.categoriasList = data?.data ?? data; // adaptá a tu respuesta real
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al cargar categorías',
+          detail: 'No se pudieron cargar las categorías',
+        });
+      },
+    });
+  }
+
   fetchArticulos() {
     this.loading = true;
-    this.articuloService.getArticulos().subscribe({
-      next: (data: any) => {
-        // Se asume que la respuesta tiene una propiedad "data" con los artículos
-        this.articulos = data.data;
+    this.articuloService.getArticulos({ page: 1, limit: this.rows, search: '' }).subscribe({
+      next: (resp: any) => {
+        this.articulos = resp.data;
+        this.totalRecords = resp.meta.total;
         this.loading = false;
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Error al cargar artículos',
           detail: 'No se pudieron cargar los artículos.',
-        })
+        });
       },
     });
   }
 
+  // ------- Dialogs -------
+
   showArticuloDialog() {
     this.articulo = {};
     this.articuloForm.reset({
+      categoriaId: null,
+      categoriaNombre: '',
       name: '',
       code: '',
       description: '',
@@ -238,17 +232,32 @@ export class ArticuloComponent implements OnInit {
       minimunStock: 0,
       isInventoriable: false,
       available: true,
+      imagenUrl: ''
     });
-    // Vaciar la relación de proveedores al crear un nuevo artículo
     this.insumoProveedores = [];
+    this.imagenFile = null;
+    if (this.fileUpload) this.fileUpload.clear();
     this.articuloDialog = true;
   }
 
   editArticulo(articulo: any) {
     this.articulo = { ...articulo };
-    this.articuloForm.patchValue(this.articulo);
-    // Se asume que el backend devuelve la relación de insumo-proveedor en "insumoProveedor"
+    this.articuloForm.patchValue({
+      categoriaId: articulo?.categoria?.id ?? null,
+      categoriaNombre: '',
+      name: articulo.name,
+      code: articulo.code,
+      description: articulo.description,
+      sinonimo: articulo.sinonimo,
+      unidad: articulo.unidad,
+      minimunStock: articulo.minimunStock ?? 0,
+      isInventoriable: !!articulo.isInventoriable,
+      available: !!articulo.available,
+      imagenUrl: articulo.imagenUrl || ''
+    });
     this.insumoProveedores = articulo.insumoProveedor || [];
+    this.imagenFile = null;
+    if (this.fileUpload) this.fileUpload.clear();
     this.articuloDialog = true;
   }
 
@@ -256,76 +265,90 @@ export class ArticuloComponent implements OnInit {
     this.articuloDialog = false;
   }
 
+  openImageDialog(imagenUrl: string) {
+    this.selectedImage = imagenUrl;
+    this.imageDialogVisible = true;
+  }
+
+  onFileSelected(event: any) {
+    if (event.files && event.files.length > 0) {
+      this.imagenFile = event.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        // vista previa
+        this.articulo.imagenUrl = reader.result as string;
+      };
+      reader.readAsDataURL(this.imagenFile!);
+    }
+  }
+
+  removeImage() {
+    this.imagenFile = null;
+    this.articulo.imagenUrl = '';
+    this.articuloForm.patchValue({ imagenUrl: '' });
+    if (this.fileUpload) this.fileUpload.clear();
+  }
+
+  // ------- Save/Delete -------
+
   saveArticulo() {
     if (this.articuloForm.invalid) {
       this.articuloForm.markAllAsTouched();
       return;
     }
 
-    const formValues = this.articuloForm.value;
+    const {
+      categoriaId,
+      categoriaNombre,
+      ...rest
+    } = this.articuloForm.value;
 
-    // Crear un FormData para enviar los datos junto con la imagen
+    // payload base
+    const payload: any = {
+      ...rest,
+      proveedores: this.insumoProveedores,
+    };
+
+    if (categoriaId) payload.categoriaId = Number(categoriaId);
+    else if (categoriaNombre?.trim()) payload.categoriaNombre = categoriaNombre.trim();
+
+    const isEdit = !!this.articulo?.id;
+
+    // Si usás archivo, usamos FormData y serializamos el array de proveedores
     const formData = new FormData();
-    formData.append('name', formValues.name);
-    formData.append('code', formValues.code);
-    formData.append('description', formValues.description);
-    formData.append('unidad', formValues.unidad);
-    formData.append('minimunStock', formValues.minimunStock);
-    formData.append('isInventoriable', formValues.isInventoriable);
-    formData.append('available', formValues.available);
+    Object.entries(payload).forEach(([k, v]) => {
+      if (k === 'proveedores') {
+        formData.append('proveedores', JSON.stringify(v));
+      } else {
+        formData.append(k, v as string);
+      }
+    });
+    if (this.imagenFile) formData.append('imageFile', this.imagenFile);
 
-    // Si se seleccionó una imagen, la adjuntas
-    if (this.imagenFile) {
-      formData.append('imageFile', this.imagenFile);
-    }
+    const obs$ = isEdit
+      ? this.articuloService.updateArticulo(this.articulo.id, formData) // id en URL
+      : this.articuloService.createArticulo(formData);
 
-    // Agregar la relación de proveedores
-    formData.append('proveedores', JSON.stringify(this.insumoProveedores));
-
-
-    // Según si es creación o edición:
-    if (this.articulo.id) {
-      this.articuloService.updateArticulo(this.articulo.id, formData).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Artículo actualizado',
-            detail: 'Se actualizó con éxito.',
-          });
-          this.fetchArticulos();
-          this.hideArticuloDialog();
-        },
-        error: (err) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error al actualizar',
-            detail: err?.message || 'No se pudo actualizar el artículo.',
-          });
-        },
-      });
-    } else {
-      this.articuloService.createArticulo(formData).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Artículo creado',
-            detail: 'Se creó con éxito.',
-          });
-          this.fetchArticulos();
-          this.hideArticuloDialog();
-        },
-        error: (err) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error al crear',
-            detail: err?.message || 'No se pudo crear el artículo.',
-          });
-        },
-      });
-    }
+    obs$.subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: isEdit ? 'Artículo actualizado' : 'Artículo creado',
+          detail: 'Operación exitosa.',
+        });
+        this.fetchArticulos();
+        this.hideArticuloDialog();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: isEdit ? 'Error al actualizar' : 'Error al crear',
+          detail: err?.message || 'No se pudo completar la operación.',
+        });
+      },
+    });
   }
 
-  // Método para eliminar un artículo
   deleteArticulo(id: number, name: string) {
     this.confirmationService.confirm({
       header: 'Confirmar eliminación',
@@ -353,7 +376,7 @@ export class ArticuloComponent implements OnInit {
     });
   }
 
-  // Métodos para la relación Insumo-Proveedor
+  // ------- Relación Insumo-Proveedor -------
 
   openNewInsumoProveedor() {
     this.insumoProveedor = { proveedorId: 0, codigoProveedor: '' };
@@ -361,13 +384,12 @@ export class ArticuloComponent implements OnInit {
   }
 
   editInsumoProveedor(rel: InsumoProveedor) {
-    // Copia el objeto para editar
     this.insumoProveedor = { ...rel };
     this.insumoProveedorDialog = true;
   }
 
   saveInsumoProveedor() {
-    if (!this.insumoProveedor.proveedorId || !this.insumoProveedor.codigoProveedor.trim()) {
+    if (!this.insumoProveedor.proveedorId || !this.insumoProveedor.codigoProveedor?.trim()) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Atención',
@@ -375,36 +397,22 @@ export class ArticuloComponent implements OnInit {
       });
       return;
     }
-    // Si ya existe una relación para ese proveedor, actualizarla; de lo contrario, agregarla
-    const index = this.insumoProveedores.findIndex(r => r.proveedorId === this.insumoProveedor.proveedorId);
-    if (index !== -1) {
-      this.insumoProveedores[index] = { ...this.insumoProveedor };
-    } else {
-      this.insumoProveedores.push({ ...this.insumoProveedor });
-    }
-    this.closeInsumoProveedorDialog();
+    const idx = this.insumoProveedores.findIndex(r => r.proveedorId === this.insumoProveedor.proveedorId);
+    if (idx !== -1) this.insumoProveedores[idx] = { ...this.insumoProveedor };
+    else this.insumoProveedores.push({ ...this.insumoProveedor });
+    this.insumoProveedorDialog = false;
   }
 
   deleteInsumoProveedor(rel: InsumoProveedor) {
     this.insumoProveedores = this.insumoProveedores.filter(r => r.proveedorId !== rel.proveedorId);
   }
 
-  closeInsumoProveedorDialog() {
-    this.insumoProveedorDialog = false;
-  }
-
-  // Método para obtener el nombre del proveedor a partir de la relación
   getProveedorName(rel: InsumoProveedor): string {
     const prov = this.proveedoresList.find(p => p.id === rel.proveedorId);
     return prov ? prov.nombre : rel.proveedorId.toString();
   }
 
-  // Método para navegar al detalle del artículo (icono "eye")
   goToDetail(id: number) {
-    // Aquí se implementa la navegación al detalle del artículo
     this.router.navigate(['/gestion-articulos', 'articulo', id]);
-    // Por ejemplo: this.router.navigate(['/insumos/detail', id]);
   }
-
-
 }
